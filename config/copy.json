@@ -272,9 +272,9 @@
         "icon": "Zap"
       },
       "community": {
-        "value": "Nostr · Discord · SN",
-        "label": "Community feeds in one platform",
-        "icon": "MessageSquare"
+        "value": "Open-source and forkable",
+        "label": "Self-hosted, configurable platform",
+        "icon": "Code"
       }
     },
     "visual": {
