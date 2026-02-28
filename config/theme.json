@@ -1,13 +1,13 @@
 {
   "ui": {
-    "showThemeSelector": true,
-    "showFontToggle": true,
+    "showThemeSelector": false,
+    "showFontToggle": false,
     "showThemeToggle": true
   },
   "defaults": {
-    "theme": null,
-    "font": null,
-    "darkMode": null
+    "theme": "amber-minimal",
+    "font": "space-grotesk",
+    "darkMode": true
   },
   "_comments": {
     "_overview": "Theme configuration system — controls visibility of theme controls and default selections for color theme, font, and dark mode.",

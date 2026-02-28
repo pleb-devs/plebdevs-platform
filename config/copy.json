@@ -113,6 +113,7 @@
     "homepage.hero.description": "One-paragraph description below the title",
     "homepage.hero.buttons.startLearning": "Primary CTA button text",
     "homepage.hero.buttons.watchDemo": "Secondary CTA button text",
+    "homepage.hero.buttons.watchDemoHref": "Optional URL for the hero demo button. Supports internal paths or external links.",
     "search": "Search page hero, tabs, empty/error states, and summary text",
     "verifyEmail": "Email verification page titles, labels, errors, and buttons",
     "about.steps": "Three cards under the About page “How to make it yours” section",
@@ -124,6 +125,8 @@
     "homepage.stats.*.icon": "Optional lucide-react icon component name (e.g., 'Users', 'BookOpen') for the stat. Falls back to a default icon if omitted or invalid.",
     "homepage.visual": "Text overlays and labels for visual elements in the hero section",
     "homepage.visual.screenLabel": "Main label shown inside the hero preview card",
+    "homepage.visual.videoUrl": "Optional hero video URL. When provided, the homepage visual renders this video instead of the static icon card.",
+    "homepage.visual.videoPoster": "Optional poster image URL shown before video playback starts",
     "homepage.visual.primaryBadge": "Top-right badge text above the hero preview card",
     "homepage.visual.secondaryBadge": "Bottom-left badge text below the hero preview card",
     "homepage.cta.title": "CTA title line",
@@ -168,58 +171,58 @@
   },
   "about": {
     "hero": {
-      "badge": "Configurable open education stack",
-      "title": "Run your own Nostr-native course & content platform",
-      "description": "pleb.school is a forkable, configuration-driven platform. Swap branding, themes, and relays to launch your own education hub, then deploy it to Vercel or your own infrastructure without rewriting the core architecture."
+      "badge": "Open-source. Nostr-native. Lightning-powered.",
+      "title": "Learn to code. Build on Bitcoin.",
+      "description": "PlebDevs combines developer education, content, and community in one platform. Publish to Nostr, monetize with Lightning, and keep your content portable."
     },
     "steps": {
       "fork": {
-        "title": "1. Fork & clone",
-        "description": "Create your own repository and clone it locally. Keep upstream changes in a branch if you want to stay close to the reference implementation."
+        "title": "1. Fork + clone",
+        "description": "Fork plebdevs-platform and clone locally. Keep upstream synced while you customize."
       },
       "configure": {
-        "title": "2. Configure branding & relays",
-        "description": "Update config/copy.json, config/content.json, and config/nostr.json to match your brand, navigation, content sections, and relay setup."
+        "title": "2. Configure",
+        "description": "Update config/copy.json, config/content.json, and config/nostr.json with your brand, relays, and content defaults."
       },
       "deploy": {
-        "title": "3. Deploy your instance",
-        "description": "Point your environment variables at your Postgres instance and Nostr relays, then deploy to Vercel, Fly.io, or your preferred platform."
+        "title": "3. Deploy",
+        "description": "Ship to Vercel or your own stack, then iterate on subscriptions, pricing, and community features."
       }
     },
     "sections": {
       "creators": {
-        "title": "For creators & communities",
-        "description": "Launch a white-label academy that lives on your domain, with your branding, pricing, and content model. Use the JSON configs under /config to define how courses, documents, and videos are presented."
+        "title": "For creators and communities",
+        "description": "Publish docs, videos, and courses to Nostr. Offer free and paid content, and monetize in sats."
       },
       "learners": {
         "title": "For learners",
-        "description": "Give your audience a single place to watch talks, follow structured courses, and read long-form content — with progress tracking, Lightning-powered interactions, and Nostr identity baked in."
+        "description": "Learn through structured courses and long-form resources, with progress tracking and community touchpoints."
       },
       "platform": {
-        "title": "For the platform builders",
-        "description": "Start from a production-ready Next.js 15 stack wired to Prisma, Nostr relays, and Lightning zaps. Swap relays, themes, auth providers, and copy by editing JSON instead of touching business logic."
+        "title": "For developers building the stack",
+        "description": "Production-ready Next.js + Prisma with Nostr and Lightning integrations. Includes NIP-23, NIP-51, NIP-99, NIP-47, NIP-58, and NIP-05 patterns."
       }
     },
     "cta": {
-      "title": "Make this platform your own",
-      "description": "Fork the repo, point it at your own relays and database, and ship a fully-branded education experience. The reference deployment runs on Vercel, but the stack stays portable.",
+      "title": "Start your PlebDevs fork",
+      "description": "Use this codebase as your launch point, then adapt copy, relays, and monetization for your community.",
       "primary": {
-        "label": "View GitHub repo",
-        "href": "https://github.com/AustinKelsay/pleb.school"
+        "label": "View PlebDevs Platform repo",
+        "href": "https://github.com/pleb-devs/plebdevs-platform"
       },
       "secondary": {
-        "label": "View config docs",
-        "href": "https://github.com/AustinKelsay/pleb.school/blob/main/config/README.md"
+        "label": "View original PlebDevs repo",
+        "href": "https://github.com/austinkelsay/plebdevs"
       }
     }
   },
   "site": {
-    "title": "pleb.school – Nostr-native course & content platform",
-    "description": "Open-source, configurable education stack for creators to run courses, videos, and documents with Nostr identity and Lightning-powered interactions.",
-    "brandName": "pleb.school"
+    "title": "PlebDevs - Build on Bitcoin",
+    "description": "A one-of-a-kind developer education, content, and community platform built on Nostr and fully Lightning integrated.",
+    "brandName": "PlebDevs"
   },
   "navigation": {
-    "searchPlaceholder": "Search content",
+    "searchPlaceholder": "Search courses, videos, docs",
     "menuItems": {
       "content": "Content",
       "feeds": "Feeds", 
@@ -227,7 +230,7 @@
       "about": "About"
     },
     "buttons": {
-      "login": "Login"
+      "login": "Sign in"
     },
     "accessibility": {
       "toggleTheme": "Toggle theme",
@@ -236,77 +239,80 @@
   },
   "homepage": {
     "hero": {
-      "badge": "Nostr-native open education stack",
+      "badge": "Build on Bitcoin, Lightning, and Nostr",
       "title": {
-        "line1": "Launch your learning hub",
-        "line2": "Built for",
+        "line1": "Learn to code",
+        "line2": "Build on",
         "useAnimated": true,
-        "animatedWords": ["Bitcoin", "Lightning", "Nostr", "AI"],
+        "animatedWords": ["Bitcoin", "Lightning", "Nostr"],
         "staticWord": "Bitcoin",
-        "line3": "Own your platform"
+        "line3": "Become a dev"
       },
-      "description": "pleb.school is the reference deployment of a configurable, open source education stack. Fork it, point it at your own relays and database, and run a fully branded Nostr-native course and content platform for your community.",
+      "description": "A one-of-a-kind developer education, content, and community platform built on Nostr and fully Lightning integrated.",
       "buttons": {
-        "startLearning": "Explore demo content",
-        "watchDemo": "Watch platform demo"
+        "startLearning": "Start Learning",
+        "watchDemo": "Watch AI Teaser",
+        "watchDemoHref": "https://plebdevs-bucket.nyc3.cdn.digitaloceanspaces.com/videos/plebdevs/plebdevs-ai-teaser-1.5.mp4"
       }
     },
     "stats": {
-      "contentTypes": {
-        "value": "Courses · Videos · Docs",
-        "label": "Multi-format learning content",
-        "icon": "BookOpen"
-      },
-      "nostrNative": {
-        "value": "Nostr-native",
-        "label": "Feeds, auth & discovery",
+      "students": {
+        "value": "500+",
+        "label": "Students enrolled",
         "icon": "Users"
       },
-      "lightningFirst": {
-        "value": "Lightning-first",
-        "label": "Zaps, tips & paid content",
+      "contentTypes": {
+        "value": "Courses · Videos · Docs",
+        "label": "Nostr-native content formats",
+        "icon": "BookOpen"
+      },
+      "lightning": {
+        "value": "Lightning integrated",
+        "label": "Subscriptions, zaps, paid content",
         "icon": "Zap"
       },
-      "selfHostedFoss": {
-        "value": "Self-hosted & FOSS",
-        "label": "MIT-licensed, own your data",
-        "icon": "Code"
+      "community": {
+        "value": "Nostr · Discord · SN",
+        "label": "Community feeds in one platform",
+        "icon": "MessageSquare"
       }
     },
     "visual": {
-      "screenLabel": "Nostr-native course & content stack",
-      "primaryBadge": "Demo deployment",
-      "secondaryBadge": "Configurable & self-hosted"
+      "screenLabel": "Build on Bitcoin",
+      "videoUrl": "https://plebdevs-bucket.nyc3.cdn.digitaloceanspaces.com/videos/plebdevs/plebdevs-ai-teaser-1.5.mp4",
+      "videoPoster": "",
+      "primaryBadge": "Nostr-native",
+      "secondaryBadge": "Lightning integrated"
     },
     "cta": {
-      "title": "Ready to run your own instance?",
-      "description": "Use this deployment as a sandbox, then fork the repo, customize the configs under /config, and ship a Nostr-native academy that lives on your domain.",
+      "title": "All content is free while we build PlebDevs V2",
+      "description": "New free AI course launching with the new platform. Stay tuned.",
       "buttons": {
-        "getStarted": "Sign in to this demo",
-        "viewCourses": "Browse demo content"
+        "getStarted": "Sign in to start",
+        "viewCourses": "Browse content"
       }
     },
     "sections": {
       "courses": {
         "title": "Courses",
-        "description": "Opinionated course layouts you can reuse for your own curriculum, from intro concepts to advanced protocol deep dives."
+        "description": "Nostr lists (NIP-51) that combine multiple documents and videos into structured learning paths."
       },
       "videos": {
-        "title": "Videos", 
-        "description": "Video-first lessons and workshops that show how talks, screencasts, and live sessions can plug into the platform."
+        "title": "Videos",
+        "description": "Formatted markdown lessons with rich media support, including embedded videos, published as NIP-23 content."
       },
       "documents": {
         "title": "Documents",
-        "description": "Long-form documents and reference notes rendered from markdown and Nostr events."
+        "description": "Long-form markdown documents posted as NIP-23 events and pulled from Nostr relays."
       }
     }
   },
   "search": {
-    "title": "Search Content",
-    "description": "Search courses and resources from Nostr relays",
-    "inputPlaceholder": "Search Nostr content... (min 3 characters)",
-    "emptyPrompt": "Please enter at least 3 characters to search",
-    "error": "Failed to search. Please try again.",
+    "title": "Search",
+    "description": "Find courses, videos, and docs from Nostr relays",
+    "inputPlaceholder": "Search Nostr content (min 3 characters)",
+    "emptyPrompt": "Enter at least 3 characters to search",
+    "error": "Search failed. Please try again.",
     "tabs": {
       "all": "All",
       "courses": "Courses",
@@ -321,15 +327,15 @@
   },
   "verifyEmail": {
     "title": "Verify Your Email",
-    "description": "Enter the 6-digit code we sent to confirm your email.",
+    "description": "Enter the 6-digit code from your PlebDevs email.",
     "codeLabel": "Verification Code",
     "codePlaceholder": "Enter the 6-digit code",
-    "noRefError": "Invalid verification link.",
+    "noRefError": "Invalid or expired verification link.",
     "errors": {
-      "invalidToken": "Invalid or used verification code.",
-      "tokenExpired": "Verification code expired. Request a new one.",
+      "invalidToken": "Invalid or already used verification code.",
+      "tokenExpired": "Verification code expired. Request a new login link.",
       "tokenMismatch": "Code does not match. Try again.",
-      "generic": "Verification failed. Please try again.",
+      "generic": "Verification failed. Try again.",
       "network": "Network error. Please try again."
     },
     "buttons": {
@@ -340,30 +346,64 @@
   "subscribe": {
     "meta": {
       "title": "Subscribe",
-      "description": "Soon, creators will be able to accept Lightning-powered subscriptions and give learners access to paid courses, resources, and exclusive community perks."
+      "description": "Lightning-powered subscriptions for premium PlebDevs content, recurring memberships, and subscriber-only perks."
     },
     "hero": {
-      "badge": "Coming soon",
-      "title": "Lightning subscriptions for pleb.school",
-      "description": "Soon you'll be able to offer paid memberships that unlock premium content on your pleb.school instance — using either pay-as-you-go invoices or recurring Lightning subscriptions powered by Nostr Wallet Connect."
+      "badge": "PlebDevs subscriptions",
+      "title": "Lightning subscriptions for PlebDevs",
+      "description": "Unlock premium content with sats using either one-time monthly access or recurring subscriptions powered by Nostr Wallet Connect."
     },
     "highlights": {
       "signal": {
         "title": "Pay-as-you-go access",
-        "description": "Prompt learners to pay a Lightning invoice one month at a time. No cards, no custodians — just sats for access."
+        "description": "One-time payment of 50,000 sats for one month of full access to paid content."
       },
       "creators": {
-        "title": "Recurring Lightning subscriptions",
-        "description": "Use Nostr Wallet Connect to let fans set up recurring Lightning subscriptions that renew automatically from their own wallet."
+        "title": "Recurring NWC subscriptions",
+        "description": "50,000 sats per month with automatic renewal through Nostr Wallet Connect from your own wallet."
       },
       "perks": {
-        "title": "Unlock paid content & perks",
-        "description": "Subscribed users get access to all paid courses and content you mark as premium, plus future member-only benefits you configure on your instance."
+        "title": "Subscriber benefits",
+        "description": "Get all paid content, 1:1 tutoring calendar access, a personal plebdevs.com Lightning Address, and a custom plebdevs.com NIP-05 identity."
       }
     },
     "cta": {
       "primary": {
-        "label": "Explore demo content",
+        "label": "View subscription details",
+        "href": "/about"
+      },
+      "secondary": {
+        "label": "Browse content",
+        "href": "/content"
+      }
+    }
+  },
+  "feeds": {
+    "meta": {
+      "title": "Feeds",
+      "description": "Follow PlebDevs community conversations from Nostr, Discord, and Stacker News in one place."
+    },
+    "hero": {
+      "title": "Community feeds across Nostr, Discord, and Stacker News",
+      "description": "PlebDevs community channels include a Nostr chat you can read and write from the platform, plus read-only Discord and Stacker News feeds."
+    },
+    "highlights": {
+      "sources": {
+        "title": "Nostr chat (read/write)",
+        "description": "Public PlebDevs Nostr chat integrated directly in the platform for active conversation."
+      },
+      "alerts": {
+        "title": "Discord feed (read-only)",
+        "description": "Mirror the PlebDevs Discord server so learners can follow updates without leaving the platform."
+      },
+      "adaptive": {
+        "title": "Stacker News ~devs (read-only)",
+        "description": "Aggregate activity from the PlebDevs Stacker News territory to keep the wider Bitcoin dev conversation visible."
+      }
+    },
+    "cta": {
+      "primary": {
+        "label": "Browse content",
         "href": "/content"
       },
       "secondary": {
@@ -372,52 +412,18 @@
       }
     }
   },
-  "feeds": {
-    "meta": {
-      "title": "Feeds",
-      "description": "Soon you’ll be able to host a Nostr-native community forum on your pleb.school instance and aggregate read-only feeds from your other spaces like Discord and Stacker News."
-    },
-    "hero": {
-      "title": "Coming soon: Nostr-native community feeds",
-      "description": "Run a Nostr-powered forum directly on your pleb.school deployment while conversations still live on Nostr. Mirror threads from your relays and pull in read-only activity from Discord servers, Stacker News Territories, and other Nostr communities."
-    },
-    "highlights": {
-      "sources": {
-        "title": "Host your Nostr forum",
-        "description": "Create a Nostr-native community board right inside your learning platform—threads, replies, and reactions live on Nostr but render alongside your courses."
-      },
-      "alerts": {
-        "title": "Bring in your other communities",
-        "description": "Pull read-only feeds from existing Nostr chats and group conversations, Discord servers, and Stacker News Territories so learners can follow the wider conversation."
-      },
-      "adaptive": {
-        "title": "One home for your people",
-        "description": "Give your community a single hub for lessons, announcements, and discussion while everything remains portable, open, and permissionless on Nostr."
-      }
-    },
-    "cta": {
-      "primary": {
-        "label": "Browse demo courses",
-        "href": "/courses"
-      },
-      "secondary": {
-        "label": "Back to home",
-        "href": "/"
-      }
-    }
-  },
   "contentLibrary": {
-    "title": "Content Library",
-    "description": "Discover courses, videos, and documents for Bitcoin, Lightning, and Nostr development",
+    "title": "All Content",
+    "description": "Courses, videos, and docs for Bitcoin, Lightning, and Nostr developers",
     "resultsCounter": "{count} of {total} items",
     "filters": {
-      "label": "Filter by:",
-      "clearFilters": "Clear filters",
+      "label": "Filter by",
+      "clearFilters": "Clear",
       "allContent": "All Content"
     },
     "emptyState": {
       "title": "No content found",
-      "description": "Try adjusting your filters to see more content",
+      "description": "Try a different filter or search term.",
       "button": "Show all content"
     }
   },
@@ -429,7 +435,7 @@
       "courseLessons": "Course Lessons"
     },
     "emptyState": {
-      "lessons": "Course lessons will be available soon. Check back later for updated content."
+      "lessons": "No lessons published yet. Check back soon."
     },
     "metrics": {
       "zaps": "zaps",
@@ -453,14 +459,14 @@
       "created": "Created",
       "lastUpdated": "Last Updated",
       "requirements": "Requirements",
-      "requirementsText": "Submission required for completion"
+      "requirementsText": "Submission required to complete this course"
     }
   },
   "resource": {
     "labels": {
       "aboutResource": "About this Resource",
       "readyToDive": "Ready to dive into the content?",
-      "clickToAccess": "Click below to access the full resource content."
+      "clickToAccess": "Use the button below to open the full resource."
     },
     "buttons": {
       "viewContent": "View Content",
@@ -486,7 +492,7 @@
   "payments": {
     "purchaseDialog": {
       "autoClaim": {
-        "unlockedTitle": "Unlocked! 🎉",
+        "unlockedTitle": "Unlocked!",
         "unlockedDescription": "Your zaps unlocked this content",
         "recordedTitle": "Payment recorded",
         "recordedDescription": "{amount} sats recorded",
@@ -503,7 +509,7 @@
         "invoiceReadyTitle": "Invoice ready",
         "invoiceReadyDescription": "Pay to unlock",
         "unlockedTitle": "Unlocked!",
-        "unlockedDescription": "Enjoy!",
+        "unlockedDescription": "Content unlocked.",
         "recordedTitle": "Recorded",
         "recordedDescription": "{amount} sats saved",
         "waitingTitle": "Waiting for receipt",
@@ -522,7 +528,7 @@
       "invalidAmountTitle": "Invalid amount",
       "invalidAmountRange": "Choose between {min}–{max} sats",
       "invalidAmountMinimum": "Minimum {min} sat",
-      "successPaidTitle": "Zap sent ⚡",
+      "successPaidTitle": "Zap sent",
       "successPaidDescription": "Thanks for the support!",
       "invoiceReadyTitle": "Invoice ready",
       "invoiceReadyDescription": "Pay with your Lightning wallet",
@@ -531,7 +537,7 @@
       "copiedTitle": "Copied!",
       "copyFailedTitle": "Copy failed",
       "retryPaidTitle": "Zap paid!",
-      "retryPaidDescription": "Thanks!",
+      "retryPaidDescription": "Thanks for supporting PlebDevs.",
       "retryFailedTitle": "WebLN failed",
       "retryFailedDescription": "Pay manually below",
       "status": {
@@ -552,7 +558,7 @@
     "sats": "sats"
   },
   "loading": {
-    "general": "Loading...",
+    "general": "Loading PlebDevs...",
     "content": "Loading content...",
     "courses": "Loading courses...",
     "videos": "Loading videos...",
@@ -561,7 +567,7 @@
   "errors": {
     "general": {
       "title": "Something went wrong",
-      "description": "An error occurred while loading this page. Please try again.",
+      "description": "We hit an error while loading this page. Please try again.",
       "button": "Try again"
     },
     "development": {
@@ -571,18 +577,18 @@
       "courses": "Error loading courses:",
       "videos": "Error loading videos:",
       "documents": "Error loading documents:",
-      "course": "Error Loading Course",
+      "course": "Error loading course",
       "courseData": "Failed to load course data"
     }
   },
   "emptyStates": {
-    "courses": "No courses available at the moment.",
-    "videos": "No video resources available at the moment.",
-    "documents": "No document resources available at the moment."
+    "courses": "No courses available right now.",
+    "videos": "No videos available right now.",
+    "documents": "No documents available right now."
   },
   "notFound": {
-    "title": "Page Not Found",
-    "description": "Sorry, we couldn't find the page you're looking for.",
+    "title": "Page not found",
+    "description": "We couldn't find the page you requested.",
     "buttons": {
       "goHome": "Go Home",
       "goBack": "Go Back"
@@ -590,7 +596,7 @@
   },
   "lessons": {
     "lessonNumber": "Lesson {index}",
-    "noDescription": "No description available",
+    "noDescription": "No lesson description yet",
     "unknownCourse": "Unknown Course",
     "coursePreview": "Course Preview",
     "unknown": "Unknown"
