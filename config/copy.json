@@ -129,6 +129,8 @@
     "homepage.visual.videoPoster": "Optional poster image URL shown before video playback starts",
     "homepage.visual.primaryBadge": "Top-right badge text above the hero preview card",
     "homepage.visual.secondaryBadge": "Bottom-left badge text below the hero preview card",
+    "homepage.visual.videoUrl": "Optional hero video URL. When set, homepage renders a video in place of the static visual.",
+    "homepage.visual.videoPoster": "Optional poster image URL shown before hero video playback.",
     "homepage.cta.title": "CTA title line",
     "homepage.cta.description": "CTA description paragraph",
     "homepage.cta.buttons.getStarted": "Primary CTA in the footer section",
