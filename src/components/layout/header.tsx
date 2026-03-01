@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Moon, Type, Check } from "lucide-react"
 import { getNavigationIcon } from "@/lib/copy-icons"
+import { OptimizedImage } from "@/components/ui/optimized-image"
 import { Container } from "./container"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { ThemeSelector } from "@/components/theme-selector"
@@ -306,9 +307,13 @@ export function Header() {
         {/* Left Section */}
         <div className="flex flex-1 items-center space-x-1 sm:space-x-2">
           <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
-              <BrandIcon className="h-4 w-4 text-primary-foreground" />
-            </div>
+            {site.brandImage ? (
+              <OptimizedImage src={site.brandImage} alt={site.brandName} width={32} height={32} className="h-8 w-8 rounded-full" />
+            ) : (
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
+                <BrandIcon className="h-4 w-4 text-primary-foreground" />
+              </div>
+            )}
             <span className="hidden sm:block text-xl font-bold">{site.brandName}</span>
           </Link>
           <DropdownMenu>

@@ -8,19 +8,19 @@ import { SessionProvider } from "@/contexts/session-provider";
 import { ToastProvider } from "@/hooks/use-toast";
 
 export const metadata: Metadata = {
-  title: "pleb.school – Nostr-native course & content platform",
+  title: "PlebDevs - Build on Bitcoin",
   description:
-    "Configurable, open-source education stack for courses, videos, and docs with Nostr identity and Lightning-powered interactions.",
+    "A one-of-a-kind developer education, content, and community platform built on Nostr and fully Lightning integrated.",
   openGraph: {
-    title: "pleb.school",
-    description: "Nostr-native education platform for courses, videos, and docs with Lightning-powered interactions.",
+    title: "PlebDevs - Build on Bitcoin",
+    description: "A one-of-a-kind developer education, content, and community platform built on Nostr and fully Lightning integrated.",
     type: "website",
-    siteName: "pleb.school",
+    siteName: "PlebDevs",
   },
   twitter: {
     card: "summary",
-    title: "pleb.school",
-    description: "Nostr-native education platform for courses, videos, and docs with Lightning-powered interactions.",
+    title: "PlebDevs - Build on Bitcoin",
+    description: "A one-of-a-kind developer education, content, and community platform built on Nostr and fully Lightning integrated.",
   },
 };
 

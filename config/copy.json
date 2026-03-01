@@ -221,7 +221,8 @@
   "site": {
     "title": "PlebDevs - Build on Bitcoin",
     "description": "A one-of-a-kind developer education, content, and community platform built on Nostr and fully Lightning integrated.",
-    "brandName": "PlebDevs"
+    "brandName": "PlebDevs",
+    "brandImage": "https://plebdevs-bucket.nyc3.cdn.digitaloceanspaces.com/images/plebdevs/plebdevs-icon-no-text.png"
   },
   "navigation": {
     "searchPlaceholder": "Search courses, videos, docs",

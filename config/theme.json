@@ -5,7 +5,7 @@
     "showThemeToggle": true
   },
   "defaults": {
-    "theme": "amber-minimal",
+    "theme": "default",
     "font": "space-grotesk",
     "darkMode": true
   },
