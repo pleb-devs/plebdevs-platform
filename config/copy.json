@@ -288,7 +288,7 @@
       "secondaryBadge": "Lightning integrated"
     },
     "cta": {
-      "title": "All PlebDevs V2 content is free to access",
+      "title": "All PlebDevs content is free to access",
       "description": "Sign in to save progress, then start learning with courses, videos, and docs on Bitcoin, Lightning, and Nostr.",
       "buttons": {
         "getStarted": "Start learning free",
