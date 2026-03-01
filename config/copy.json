@@ -173,48 +173,48 @@
   },
   "about": {
     "hero": {
-      "badge": "Open-source. Nostr-native. Lightning-powered.",
-      "title": "Learn to code. Build on Bitcoin.",
-      "description": "PlebDevs combines developer education, content, and community in one platform. Publish to Nostr, monetize with Lightning, and keep your content portable."
+      "badge": "Community-first. Open-source by design.",
+      "title": "Built with the PlebDevs community, for the PlebDevs community",
+      "description": "PlebDevs is a community-driven instance of the pleb.school platform focused on practical developer education for Bitcoin, Lightning, and Nostr."
     },
     "steps": {
       "fork": {
-        "title": "1. Fork + clone",
-        "description": "Fork plebdevs-platform and clone locally. Keep upstream synced while you customize."
+        "title": "1. Learn and build together",
+        "description": "Use PlebDevs content, share feedback, and collaborate in public with other Bitcoin-focused developers."
       },
       "configure": {
-        "title": "2. Configure",
-        "description": "Update config/copy.json, config/content.json, and config/nostr.json with your brand, relays, and content defaults."
+        "title": "2. Adapt it for your community",
+        "description": "Customize config/copy.json, config/content.json, config/theme.json, and config/nostr.json to match your voice, curriculum, and relay setup."
       },
       "deploy": {
-        "title": "3. Deploy",
-        "description": "Ship to Vercel or your own stack, then iterate on subscriptions, pricing, and community features."
+        "title": "3. Launch your own instance",
+        "description": "Deploy your fork, publish your own lessons, and evolve your platform with your community over time."
       }
     },
     "sections": {
       "creators": {
-        "title": "For creators and communities",
-        "description": "Publish docs, videos, and courses to Nostr. Offer free and paid content, and monetize in sats."
+        "title": "For educators, maintainers, and communities",
+        "description": "Publish docs, videos, and courses in a format that is transparent, portable, and easy to iterate on together."
       },
       "learners": {
-        "title": "For learners",
-        "description": "Learn through structured courses and long-form resources, with progress tracking and community touchpoints."
+        "title": "For builders learning in public",
+        "description": "Follow structured lessons, ship real projects, and learn alongside a community focused on practical outcomes."
       },
       "platform": {
-        "title": "For developers building the stack",
-        "description": "Production-ready Next.js + Prisma with Nostr and Lightning integrations. Includes NIP-23, NIP-51, NIP-99, NIP-47, NIP-58, and NIP-05 patterns."
+        "title": "For teams running their own school",
+        "description": "Fork the open-source platform and run a branded developer school on production-ready Next.js, Prisma, Nostr, and Lightning foundations."
       }
     },
     "cta": {
-      "title": "Start your PlebDevs fork",
-      "description": "Use this codebase as your launch point, then adapt copy, relays, and monetization for your community.",
+      "title": "Start with community, then scale with code",
+      "description": "PlebDevs runs on a configurable open-source platform your team can fork, customize, and deploy for your own audience.",
       "primary": {
-        "label": "View PlebDevs Platform repo",
+        "label": "Fork PlebDevs Platform",
         "href": "https://github.com/pleb-devs/plebdevs-platform"
       },
       "secondary": {
-        "label": "View original PlebDevs repo",
-        "href": "https://github.com/austinkelsay/plebdevs"
+        "label": "View upstream pleb.school",
+        "href": "https://github.com/AustinKelsay/pleb.school"
       }
     }
   },
@@ -275,8 +275,8 @@
         "icon": "Zap"
       },
       "community": {
-        "value": "Open-source and forkable",
-        "label": "Self-hosted, configurable platform",
+        "value": "Free and open-source",
+        "label": "All PlebDevs content is free to access",
         "icon": "Code"
       }
     },
@@ -288,11 +288,11 @@
       "secondaryBadge": "Lightning integrated"
     },
     "cta": {
-      "title": "All content is free while we build PlebDevs V2",
-      "description": "New free AI course launching with the new platform. Stay tuned.",
+      "title": "All PlebDevs V2 content is free to access",
+      "description": "Sign in to save progress, then start learning with courses, videos, and docs on Bitcoin, Lightning, and Nostr.",
       "buttons": {
-        "getStarted": "Sign in to start",
-        "viewCourses": "Browse content"
+        "getStarted": "Start learning free",
+        "viewCourses": "Explore free content"
       }
     },
     "sections": {
@@ -348,36 +348,36 @@
   },
   "subscribe": {
     "meta": {
-      "title": "Subscribe",
-      "description": "Lightning-powered subscriptions for premium PlebDevs content, recurring memberships, and subscriber-only perks."
+      "title": "Subscriptions (Coming Soon)",
+      "description": "Subscriptions are not implemented yet. All PlebDevs content is currently free to access."
     },
     "hero": {
-      "badge": "PlebDevs subscriptions",
-      "title": "Lightning subscriptions for PlebDevs",
-      "description": "Unlock premium content with sats using either one-time monthly access or recurring subscriptions powered by Nostr Wallet Connect."
+      "badge": "Coming soon",
+      "title": "Subscriptions are coming soon",
+      "description": "PlebDevs subscriptions are not live yet. For now, all content on PlebDevs is free to access."
     },
     "highlights": {
       "signal": {
-        "title": "Pay-as-you-go access",
-        "description": "One-time payment of 50,000 sats for one month of full access to paid content."
+        "title": "Not live yet",
+        "description": "Subscription payments and recurring billing are still in development."
       },
       "creators": {
-        "title": "Recurring NWC subscriptions",
-        "description": "50,000 sats per month with automatic renewal through Nostr Wallet Connect from your own wallet."
+        "title": "What to expect",
+        "description": "Future releases will add optional paid tiers powered by Lightning and Nostr-native flows."
       },
       "perks": {
-        "title": "Subscriber benefits",
-        "description": "Get all paid content, 1:1 tutoring calendar access, a personal plebdevs.com Lightning Address, and a custom plebdevs.com NIP-05 identity."
+        "title": "Current access",
+        "description": "Everything on PlebDevs is free right now, so you can start learning immediately."
       }
     },
     "cta": {
       "primary": {
-        "label": "View subscription details",
-        "href": "/about"
+        "label": "Explore free content",
+        "href": "/content"
       },
       "secondary": {
-        "label": "Browse content",
-        "href": "/content"
+        "label": "Back to home",
+        "href": "/"
       }
     }
   },

@@ -5,8 +5,8 @@
     "showThemeToggle": true
   },
   "defaults": {
-    "theme": "default",
-    "font": "space-grotesk",
+    "theme": "starry-night",
+    "font": "system-mono",
     "darkMode": true
   },
   "_comments": {
