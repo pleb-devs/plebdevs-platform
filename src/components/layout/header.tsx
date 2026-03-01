@@ -7,6 +7,7 @@ import { signOut, useSession } from "next-auth/react"
 import { Check, Moon, Type } from "lucide-react"
 import { useTheme } from "next-themes"
 
+import { FontToggle } from "@/components/font-toggle"
 import { ThemeSelector } from "@/components/theme-selector"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -22,19 +23,9 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-<<<<<<< HEAD
-import { Moon, Type, Check } from "lucide-react"
-import { getNavigationIcon } from "@/lib/copy-icons"
-import { OptimizedImage } from "@/components/ui/optimized-image"
-import { Container } from "./container"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { ThemeSelector } from "@/components/theme-selector"
-import { FontToggle } from "@/components/font-toggle"
-=======
 import { Input } from "@/components/ui/input"
->>>>>>> upstream/main
+import { OptimizedImage } from "@/components/ui/optimized-image"
 import { Switch } from "@/components/ui/switch"
-import { FontToggle } from "@/components/font-toggle"
 import { useThemeColor } from "@/contexts/theme-context"
 import { useIsAdmin } from "@/hooks/useAdmin"
 import { isAnonymousAvatar, isAnonymousUsername } from "@/lib/anonymous-identity"
