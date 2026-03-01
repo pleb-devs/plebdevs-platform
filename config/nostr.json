@@ -4,9 +4,7 @@
       "wss://nos.lol",
       "wss://relay.damus.io",
       "wss://relay.snort.social",
-      "wss://relay.nostr.band",
       "wss://relay.primal.net",
-      "wss://nostrue.com",
       "wss://purplerelay.com"
     ],
     "zapThreads": [
