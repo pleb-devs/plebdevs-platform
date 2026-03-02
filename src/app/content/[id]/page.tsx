@@ -38,6 +38,7 @@ import { formatNoteIdentifier } from '@/lib/note-identifiers'
 import { PurchaseDialog } from '@/components/purchase/purchase-dialog'
 import { useSession } from 'next-auth/react'
 import { AdditionalLinksCard } from '@/components/ui/additional-links-card'
+import { extractRelayHintsFromDecodedData } from '@/lib/relay-hints'
 
 interface ResourcePageProps {
   params: Promise<{
@@ -139,6 +140,11 @@ function ResourcePageContent({ resourceId }: { resourceId: string }) {
     if (!identifier) return undefined
     return `${event.kind}:${event.pubkey}:${identifier}`
   }, [event])
+
+  const routeRelayHints = useMemo(
+    () => extractRelayHintsFromDecodedData(idResult?.decodedData),
+    [idResult?.decodedData]
+  )
   
   // Get real interaction data from Nostr - call hook unconditionally at top level
   const {
@@ -155,7 +161,8 @@ function ResourcePageContent({ resourceId }: { resourceId: string }) {
   } = useInteractions({
     eventId: event?.id,
     eventATag,
-    realtime: false,
+    realtime: true,
+    relayHints: routeRelayHints,
     staleTime: 5 * 60 * 1000 // Use staleTime instead of cacheDuration
   })
 
@@ -493,7 +500,8 @@ function ResourcePageContent({ resourceId }: { resourceId: string }) {
                   zapTarget={{
                     pubkey: event.pubkey,
                     lightningAddress: authorProfile?.lud16 || undefined,
-                    name: author
+                    name: author,
+                    relayHints: routeRelayHints
                   }}
                 />
                 
@@ -560,7 +568,8 @@ function ResourcePageContent({ resourceId }: { resourceId: string }) {
                   zapTarget={{
                     pubkey: event.pubkey,
                     lightningAddress: authorProfile?.lud16 || undefined,
-                    name: author
+                    name: author,
+                    relayHints: routeRelayHints
                   }}
                   viewerZapTotalSats={viewerZapTotalSats}
                   alreadyPurchased={serverPurchased}
