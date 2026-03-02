@@ -121,3 +121,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Keep thumbnail type icons visible on touch devices, but reveal on hover for pointer/hover devices. */
+.thumbnail-type-overlay {
+  opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .group .thumbnail-type-overlay {
+    opacity: 0;
+  }
+
+  .group:hover .thumbnail-type-overlay,
+  .group:focus-within .thumbnail-type-overlay {
+    opacity: 1;
+  }
+}
