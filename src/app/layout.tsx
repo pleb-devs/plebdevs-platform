@@ -6,6 +6,9 @@ import { ThemeColorProvider } from "@/contexts/theme-context";
 import { QueryProvider } from "@/contexts/query-provider";
 import { SessionProvider } from "@/contexts/session-provider";
 import { ToastProvider } from "@/hooks/use-toast";
+import { copyConfig } from "@/lib/copy";
+
+const siteFavicon = copyConfig.site.favicon?.trim() || "/favicon.ico";
 
 export const metadata: Metadata = {
   title: "pleb.school – Nostr-native course & content platform",
@@ -21,6 +24,11 @@ export const metadata: Metadata = {
     card: "summary",
     title: "pleb.school",
     description: "Nostr-native education platform for courses, videos, and docs with Lightning-powered interactions.",
+  },
+  icons: {
+    icon: siteFavicon,
+    shortcut: siteFavicon,
+    apple: siteFavicon,
   },
 };
 

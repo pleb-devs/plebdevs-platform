@@ -176,9 +176,12 @@ Global site metadata.
 {
   "title": "pleb.school – Nostr-native course & content platform",
   "description": "Open-source, configurable education stack...",
-  "brandName": "pleb.school"
+  "brandName": "pleb.school",
+  "favicon": "/favicon.ico"
 }
 ```
+
+- `favicon` (optional) - Browser tab icon URL. Falls back to `/favicon.ico` when missing/empty.
 
 ### navigation
 

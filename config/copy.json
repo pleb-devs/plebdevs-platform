@@ -89,6 +89,7 @@
     "site.title": "Main site title used in browser tab, SEO meta title, and site header",
     "site.description": "Site description used in meta tags for SEO and social sharing",
     "site.brandName": "Brand name displayed in header logo/navigation area",
+    "site.favicon": "Favicon URL for browser tabs/bookmarks. Defaults to /favicon.ico when omitted or empty.",
     "navigation": "Header navigation text including search, menu items, buttons, and accessibility labels",
     "navigation.searchPlaceholder": "Placeholder text shown in the search input field",
     "navigation.menuItems": "Text labels for main navigation menu items (links in the header)",
@@ -219,7 +220,8 @@
   "site": {
     "title": "pleb.school – Nostr-native course & content platform",
     "description": "Open-source, configurable education stack for creators to run courses, videos, and documents with Nostr identity and Lightning-powered interactions.",
-    "brandName": "pleb.school"
+    "brandName": "pleb.school",
+    "favicon": "/favicon.ico"
   },
   "navigation": {
     "searchPlaceholder": "Search content",
