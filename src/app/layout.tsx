@@ -6,6 +6,9 @@ import { ThemeColorProvider } from "@/contexts/theme-context";
 import { QueryProvider } from "@/contexts/query-provider";
 import { SessionProvider } from "@/contexts/session-provider";
 import { ToastProvider } from "@/hooks/use-toast";
+import { copyConfig } from "@/lib/copy";
+
+const siteFavicon = copyConfig.site.favicon?.trim() || "/favicon.ico";
 
 export const metadata: Metadata = {
   title: "PlebDevs - Build on Bitcoin",
@@ -21,6 +24,11 @@ export const metadata: Metadata = {
     card: "summary",
     title: "PlebDevs - Build on Bitcoin",
     description: "A one-of-a-kind developer education, content, and community platform built on Nostr and fully Lightning integrated.",
+  },
+  icons: {
+    icon: siteFavicon,
+    shortcut: siteFavicon,
+    apple: siteFavicon,
   },
 };
 
