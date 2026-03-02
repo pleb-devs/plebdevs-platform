@@ -113,8 +113,9 @@
     "homepage.hero.title.line3": "Final line of the hero title",
     "homepage.hero.description": "One-paragraph description below the title",
     "homepage.hero.buttons.startLearning": "Primary CTA button text",
+    "homepage.hero.buttons.startLearningHref": "Optional destination for the primary hero CTA. Supports internal paths (/content) and external URLs (https://...). Defaults to /content when omitted.",
     "homepage.hero.buttons.watchDemo": "Secondary CTA button text",
-    "homepage.hero.buttons.watchDemoHref": "Optional destination for the secondary hero CTA. Supports internal paths (/about) and external URLs (https://...). Defaults to /demo when omitted.",
+    "homepage.hero.buttons.watchDemoHref": "Optional destination for the secondary hero CTA. Supports internal paths (/content) and external URLs (https://...). Defaults to /content when omitted.",
     "search": "Search page hero, tabs, empty/error states, and summary text",
     "verifyEmail": "Email verification page titles, labels, errors, and buttons",
     "about.steps": "Three cards under the About page “How to make it yours” section",
@@ -134,6 +135,7 @@
     "homepage.cta.description": "CTA description paragraph",
     "homepage.cta.buttons.getStarted": "Primary CTA in the footer section",
     "homepage.cta.buttons.viewCourses": "Secondary CTA in the footer section",
+    "homepage.cta.buttons.viewCoursesHref": "Optional destination for the secondary footer CTA. Supports internal paths (/content) and external URLs (https://...). Defaults to /content when omitted.",
     "homepage.cta": "Call-to-action section at bottom of homepage with title, description, and buttons",
     "homepage.sections": "Title and description text for content sections (courses, videos, documents)",
     "subscribe": "Subscribe page hero and highlights describing Lightning-powered subscriptions for creators and how learners unlock paid content and perks",
@@ -253,8 +255,9 @@
       "description": "pleb.school is the reference deployment of a configurable, open source education stack. Fork it, point it at your own relays and database, and run a fully branded Nostr-native course and content platform for your community.",
       "buttons": {
         "startLearning": "Explore demo content",
+        "startLearningHref": "/content",
         "watchDemo": "Watch platform demo",
-        "watchDemoHref": "/courses"
+        "watchDemoHref": "/content"
       }
     },
     "stats": {
@@ -291,7 +294,8 @@
       "description": "Use this deployment as a sandbox, then fork the repo, customize the configs under /config, and ship a Nostr-native academy that lives on your domain.",
       "buttons": {
         "getStarted": "Sign in to this demo",
-        "viewCourses": "Browse demo content"
+        "viewCourses": "Browse demo content",
+        "viewCoursesHref": "/content"
       }
     },
     "sections": {
@@ -406,7 +410,7 @@
     "cta": {
       "primary": {
         "label": "Browse demo courses",
-        "href": "/courses"
+        "href": "/content"
       },
       "secondary": {
         "label": "Back to home",

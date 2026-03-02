@@ -216,6 +216,7 @@ Hero, stats, visual elements, CTA, and section descriptions.
 - `title.staticWord` - Word when animation disabled
 - `description` - Hero description
 - `buttons.startLearning/watchDemo` - CTA buttons
+- `buttons.startLearningHref/watchDemoHref` - Optional CTA destinations (internal path or external URL)
 
 **stats** - Platform metrics (configurable array):
 ```json
@@ -231,6 +232,7 @@ Hero, stats, visual elements, CTA, and section descriptions.
 **visual** - Hero visual element labels.
 
 **cta** - Footer call-to-action section.
+- `buttons.viewCoursesHref` - Optional destination for the secondary CTA (internal path or external URL)
 
 **sections** - Content section titles/descriptions.
 

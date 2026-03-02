@@ -92,8 +92,12 @@ export default function Home() {
     icon: getStatIconComponent(stat.icon)
   }))
 
-  const watchDemoHref = homepage.hero.buttons.watchDemoHref || "/demo"
+  const watchDemoHref = homepage.hero.buttons.watchDemoHref || "/content"
+  const startLearningHref = homepage.hero.buttons.startLearningHref || "/content"
+  const viewCoursesHref = homepage.cta.buttons.viewCoursesHref || "/content"
+  const isExternalStartLearningHref = /^https?:\/\//i.test(startLearningHref)
   const isExternalWatchDemoHref = /^https?:\/\//i.test(watchDemoHref)
+  const isExternalViewCoursesHref = /^https?:\/\//i.test(viewCoursesHref)
   const heroVideoUrl = homepage.visual.videoUrl
   const heroVideoPoster = homepage.visual.videoPoster
 
@@ -123,12 +127,21 @@ export default function Home() {
 
               {/* CTA */}
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4">
-                <Link href="/courses">
-                  <Button size="lg" className="w-full sm:w-auto sm:flex-none">
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    {homepage.hero.buttons.startLearning}
+                {isExternalStartLearningHref ? (
+                  <Button asChild size="lg" className="w-full sm:w-auto sm:flex-none">
+                    <a href={startLearningHref} target="_blank" rel="noopener noreferrer">
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      {homepage.hero.buttons.startLearning}
+                    </a>
                   </Button>
-                </Link>
+                ) : (
+                  <Button asChild size="lg" className="w-full sm:w-auto sm:flex-none">
+                    <Link href={startLearningHref}>
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      {homepage.hero.buttons.startLearning}
+                    </Link>
+                  </Button>
+                )}
                 {isExternalWatchDemoHref ? (
                   <Button asChild variant="outline" size="lg" className="w-full sm:w-auto sm:flex-none">
                     <a href={watchDemoHref} target="_blank" rel="noopener noreferrer">
@@ -234,12 +247,21 @@ export default function Home() {
                   {homepage.cta.buttons.getStarted}
                 </Button>
               </Link>
-              <Link href="/courses">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto sm:min-w-[140px]">
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  {homepage.cta.buttons.viewCourses}
+              {isExternalViewCoursesHref ? (
+                <Button asChild variant="outline" size="lg" className="w-full sm:w-auto sm:min-w-[140px]">
+                  <a href={viewCoursesHref} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    {homepage.cta.buttons.viewCourses}
+                  </a>
                 </Button>
-              </Link>
+              ) : (
+                <Button asChild variant="outline" size="lg" className="w-full sm:w-auto sm:min-w-[140px]">
+                  <Link href={viewCoursesHref}>
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    {homepage.cta.buttons.viewCourses}
+                  </Link>
+                </Button>
+              )}
             </div>
           </div>
         </Section>

@@ -51,7 +51,7 @@ export default function FeedsPage() {
                 "Experiment with scoring and personalization while keeping your content portable on Nostr."
             }
           ]}
-          primaryCta={cta?.primary ?? { label: "Browse demo courses", href: "/courses" }}
+          primaryCta={cta?.primary ?? { label: "Browse demo courses", href: "/content" }}
           secondaryCta={cta?.secondary ?? { label: "Back to home", href: "/" }}
         />
       </Section>
