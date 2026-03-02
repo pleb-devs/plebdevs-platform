@@ -276,12 +276,12 @@
       },
       "lightning": {
         "value": "Lightning integrated",
-        "label": "Subscriptions, zaps, paid content",
+        "label": "zaps enabled but all content is free",
         "icon": "Zap"
       },
       "community": {
         "value": "Free and open-source",
-        "label": "All PlebDevs content is free to access",
+        "label": "PlebDevs content is fully free and open-source",
         "icon": "Code"
       }
     },
