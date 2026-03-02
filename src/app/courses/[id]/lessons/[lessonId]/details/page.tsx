@@ -35,6 +35,7 @@ import { getRelays } from '@/lib/nostr-relays'
 import { useCommentThreads } from '@/hooks/useCommentThreads'
 import type { AdditionalLink } from '@/types/additional-links'
 import { AdditionalLinksCard } from '@/components/ui/additional-links-card'
+import { extractRelayHintsFromDecodedData } from '@/lib/relay-hints'
 
 function resolveLessonVideoUrl(
   parsedVideoUrl: string | undefined,
@@ -199,6 +200,11 @@ function LessonContent({
   const resolvedLesson = React.useMemo(() => resolveUniversalId(lessonId), [lessonId])
   const resolvedCourseId = resolvedCourse?.resolvedId ?? ''
   const resolvedLessonId = resolvedLesson?.resolvedId ?? ''
+  const routeRelayHints = useMemo(() => {
+    const courseHints = extractRelayHintsFromDecodedData(resolvedCourse?.decodedData)
+    const lessonHints = extractRelayHintsFromDecodedData(resolvedLesson?.decodedData)
+    return Array.from(new Set([...courseHints, ...lessonHints]))
+  }, [resolvedCourse?.decodedData, resolvedLesson?.decodedData])
   
   // Use the new hooks to fetch lesson and course data with Nostr integration
   const { lesson: lessonData, isLoading: lessonLoading, isError: lessonError } = useLessonQuery(resolvedLessonId)
@@ -222,7 +228,11 @@ function LessonContent({
   const resourceUnlockedViaCourse = Boolean((lesson?.resource as any)?.unlockedViaCourse)
   const resourcePurchased = !resourceRequiresPurchase || resourceUnlockedViaCourse
 
-  const interactionData = useCommentThreads(resourceNote?.id, { enabled: Boolean(resourceNote?.id) && resourcePurchased })
+  const interactionData = useCommentThreads(resourceNote?.id, {
+    enabled: Boolean(resourceNote?.id) && resourcePurchased,
+    realtime: true,
+    relayHints: routeRelayHints
+  })
   const [isFullWidth, setIsFullWidth] = useState(false)
 
   if (!resolvedCourse || !resolvedLesson) {
@@ -419,6 +429,7 @@ let courseInstructorPubkey = ''
           serverPrice={lesson.resource.price ?? null}
           serverPurchased={resourcePurchased}
           interactionData={interactionData}
+          relayHints={routeRelayHints}
           showBackLink
           backHref={`/courses/${resolvedCourseId}`}
           isPremium={resourceIsPremium}
