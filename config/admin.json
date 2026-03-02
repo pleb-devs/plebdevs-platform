@@ -44,7 +44,7 @@
     "requireAdminApproval": false,
     "enableAdminDashboard": true,
     "showAdminBadge": true,
-    "adminContactEmail": "admin@pleb.school"
+    "adminContactEmail": "admin@plebdevs.com"
   },
   "_comments": {
     "_overview": "Admin configuration - controls admin users and their permissions",
@@ -122,7 +122,7 @@
         "requireAdminApproval": true,
         "enableAdminDashboard": true,
         "showAdminBadge": true,
-        "adminContactEmail": "admin@pleb.school"
+        "adminContactEmail": "admin@plebdevs.com"
       }
     }
   }

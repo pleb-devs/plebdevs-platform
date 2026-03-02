@@ -1,5 +1,5 @@
 /**
- * URL validation utilities for pleb.school
+ * URL validation utilities for plebdevs.com
  * 
  * Provides secure URL validation to prevent open redirect vulnerabilities
  * and ensure URLs are safe for authentication callbacks.
@@ -11,7 +11,7 @@
  */
 const TRUSTED_DOMAINS = [
   // Our own domain
-  'pleb.school',
+  'plebdevs.com',
   'localhost',
   '127.0.0.1',
   // Development domains

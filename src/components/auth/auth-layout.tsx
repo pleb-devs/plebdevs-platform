@@ -40,7 +40,7 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
           
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-primary">
-              {copyConfig.site.brandName ?? 'pleb.school'}
+              {copyConfig.site.brandName ?? 'plebdevs.com'}
             </h1>
             <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground">
               {title}

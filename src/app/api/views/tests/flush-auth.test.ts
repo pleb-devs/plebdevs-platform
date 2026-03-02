@@ -37,7 +37,7 @@ function createRequest({
   cronHeader?: string
   status?: string
 }): NextRequest {
-  const url = new URL("https://pleb.school/api/views/flush")
+  const url = new URL("https://plebdevs.com/api/views/flush")
   if (token) {
     url.searchParams.set("token", token)
   }

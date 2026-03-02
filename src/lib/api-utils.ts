@@ -1,5 +1,5 @@
 /**
- * API validation utilities and error handling for pleb.school
+ * API validation utilities and error handling for plebdevs.com
  * Provides consistent validation, error handling, and response formatting
  */
 

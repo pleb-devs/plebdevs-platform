@@ -16,8 +16,8 @@ export async function generateMetadata(
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   if (!uuidRegex.test(id)) {
     return {
-      title: 'Content | pleb.school',
-      description: 'View content on pleb.school',
+      title: 'Content | plebdevs.com',
+      description: 'View content on plebdevs.com',
     }
   }
 
@@ -25,14 +25,14 @@ export async function generateMetadata(
     const resource = await ResourceAdapter.findByIdWithNote(id)
     if (!resource) {
       return {
-        title: 'Content Not Found | pleb.school',
+        title: 'Content Not Found | plebdevs.com',
         description: 'The requested content could not be found.',
       }
     }
 
     // Parse Nostr note if available for richer metadata
     let title = 'Content'
-    let description = 'View content on pleb.school'
+    let description = 'View content on plebdevs.com'
     let image: string | undefined
 
     if (resource.note) {
@@ -47,13 +47,13 @@ export async function generateMetadata(
     }
 
     const metadata: Metadata = {
-      title: `${title} | pleb.school`,
+      title: `${title} | plebdevs.com`,
       description: description.slice(0, 160),
       openGraph: {
         title,
         description: description.slice(0, 160),
         type: 'article',
-        siteName: 'pleb.school',
+        siteName: 'plebdevs.com',
         ...(image && { images: [{ url: image }] }),
       },
       twitter: {
@@ -68,8 +68,8 @@ export async function generateMetadata(
   } catch (error) {
     console.error('Error generating content metadata:', error)
     return {
-      title: 'Content | pleb.school',
-      description: 'View content on pleb.school',
+      title: 'Content | plebdevs.com',
+      description: 'View content on plebdevs.com',
     }
   }
 }

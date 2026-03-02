@@ -27,7 +27,7 @@ export default function SubscribePage() {
           title={hero?.title ?? "Subscribe for platform updates"}
           description={
             hero?.description ??
-            "Short, high-signal updates when new features, deployment patterns, and configuration examples land in the reference pleb.school stack."
+            "Short, high-signal updates when new features, deployment patterns, and configuration examples land in the reference plebdevs.com stack."
           }
           highlights={[
             {

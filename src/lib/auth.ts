@@ -233,11 +233,11 @@ if (authConfig.providers.email.enabled) {
           const result = await transport.sendMail({
             to: email,
             from: provider.from,
-            subject: "Sign in to pleb.school",
-            text: `Sign in to pleb.school\n\nClick this link to sign in:\n${url}\n\nIf you didn't request this, you can ignore this email.\n`,
+            subject: "Sign in to plebdevs.com",
+            text: `Sign in to plebdevs.com\n\nClick this link to sign in:\n${url}\n\nIf you didn't request this, you can ignore this email.\n`,
             html: `
               <div style="max-width: 480px; margin: 0 auto; font-family: sans-serif;">
-                <h2 style="color: #1a1a1a;">Sign in to pleb.school</h2>
+                <h2 style="color: #1a1a1a;">Sign in to plebdevs.com</h2>
                 <p>Click the button below to sign in:</p>
                 <a href="${escapedUrl}" style="display: inline-block; padding: 12px 24px; background: #7c3aed; color: white; text-decoration: none; border-radius: 6px; margin: 16px 0;">
                   Sign in

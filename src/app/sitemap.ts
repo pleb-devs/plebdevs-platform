@@ -8,7 +8,7 @@ let hasLoggedCourseSitemapError = false
 let hasLoggedResourceSitemapError = false
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = (process.env.NEXTAUTH_URL || "https://pleb.school").replace(/\/+$/, "")
+  const baseUrl = (process.env.NEXTAUTH_URL || "https://plebdevs.com").replace(/\/+$/, "")
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [

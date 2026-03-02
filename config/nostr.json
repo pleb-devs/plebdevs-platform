@@ -46,7 +46,7 @@
   "publishingDefaults": {
     "tags": {
       "includeClientTag": true,
-      "clientName": "pleb.school",
+      "clientName": "plebdevs.com",
       "clientVersion": "1.0.0"
     },
     "timeout": 10000,
@@ -73,7 +73,7 @@
     "contentTags": {
       "language": "en",
       "license": "CC-BY-4.0",
-      "platform": "pleb.school"
+      "platform": "plebdevs.com"
     }
   },
   "_comments": {

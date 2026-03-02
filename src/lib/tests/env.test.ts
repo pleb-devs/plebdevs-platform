@@ -62,7 +62,7 @@ function validProductionEnv(overrides: Partial<Record<ManagedKey, string>> = {})
     NODE_ENV: "production",
     DATABASE_URL: "postgresql://user:pass@localhost:5432/pleb_school?schema=public",
     NEXTAUTH_SECRET: "x".repeat(32),
-    NEXTAUTH_URL: "https://pleb.school",
+    NEXTAUTH_URL: "https://plebdevs.com",
     PRIVKEY_ENCRYPTION_KEY: VALID_HEX_KEY,
     KV_REST_API_URL: "https://example.upstash.io",
     KV_REST_API_TOKEN: "upstash-token",
@@ -130,7 +130,7 @@ describe("env", () => {
 
     expect(env.DATABASE_URL).toContain("postgresql://placeholder:")
     expect(env.NEXTAUTH_SECRET).toContain(TEMP_ENV_PLACEHOLDER_PREFIX)
-    expect(env.NEXTAUTH_URL).toBe("https://placeholder.pleb.school")
+    expect(env.NEXTAUTH_URL).toBe("https://placeholder.plebdevs.com")
     expect(env.PRIVKEY_ENCRYPTION_KEY).toMatch(/^[0-9a-f]{64}$/)
     expect(env.KV_REST_API_URL).toContain(TEMP_ENV_PLACEHOLDER_PREFIX)
     expect(env.KV_REST_API_TOKEN).toContain(TEMP_ENV_PLACEHOLDER_PREFIX)
@@ -165,7 +165,7 @@ describe("env", () => {
     )
     expect(env.NODE_ENV).toBe("production")
     expect(env.VERCEL_ENV).toBe("preview")
-    expect(env.NEXTAUTH_URL).toBe("https://pleb.school")
+    expect(env.NEXTAUTH_URL).toBe("https://plebdevs.com")
     expect(env.KV_REST_API_URL).toBeUndefined()
     expect(env.KV_REST_API_TOKEN).toBeUndefined()
     expect(env.VIEWS_CRON_SECRET).toBeUndefined()
@@ -177,18 +177,18 @@ describe("env", () => {
       validProductionEnv({
         VERCEL_ENV: "preview",
         NEXTAUTH_URL: "",
-        VERCEL_URL: "plebschool-preview.vercel.app",
+        VERCEL_URL: "plebdevs-preview.vercel.app",
       })
     )
 
-    expect(env.NEXTAUTH_URL).toBe("https://plebschool-preview.vercel.app")
+    expect(env.NEXTAUTH_URL).toBe("https://plebdevs-preview.vercel.app")
   })
 
   it("requires NEXTAUTH_URL to use https in production", async () => {
     await expect(
       loadEnvWith(
         validProductionEnv({
-          NEXTAUTH_URL: "http://pleb.school",
+          NEXTAUTH_URL: "http://plebdevs.com",
         })
       )
     ).rejects.toThrow("NEXTAUTH_URL must use https in production.")
@@ -208,7 +208,7 @@ describe("env", () => {
     const env = await loadEnvWith(validProductionEnv())
     expect(env.NODE_ENV).toBe("production")
     expect(env.DATABASE_URL).toContain("postgresql://")
-    expect(env.NEXTAUTH_URL).toBe("https://pleb.school")
+    expect(env.NEXTAUTH_URL).toBe("https://plebdevs.com")
   })
 
   it("accepts AUTH_SECRET as an alias for NEXTAUTH_SECRET", async () => {

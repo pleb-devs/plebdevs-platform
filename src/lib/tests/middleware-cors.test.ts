@@ -22,7 +22,7 @@ function createRequest(options: RequestOptions): NextRequest {
     headers.set("access-control-request-headers", options.requestHeaders)
   }
 
-  return new NextRequest(`https://pleb.school${options.path}`, {
+  return new NextRequest(`https://plebdevs.com${options.path}`, {
     method: options.method,
     headers,
   })

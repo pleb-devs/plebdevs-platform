@@ -65,7 +65,7 @@ describe("/api/views route", () => {
 
   it("returns 400 when neither key nor ns/id is provided", async () => {
     const { POST } = await loadRouteWithRateLimitSuccess(true)
-    const request = new Request("https://pleb.school/api/views", {
+    const request = new Request("https://plebdevs.com/api/views", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),
@@ -78,7 +78,7 @@ describe("/api/views route", () => {
 
   it("returns 400 for invalid key format", async () => {
     const { POST } = await loadRouteWithRateLimitSuccess(true)
-    const request = new Request("https://pleb.school/api/views", {
+    const request = new Request("https://plebdevs.com/api/views", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ key: "arbitrary-user-input" }),
@@ -93,7 +93,7 @@ describe("/api/views route", () => {
 
   it("returns 429 when write rate limit is exceeded", async () => {
     const { POST } = await loadRouteWithRateLimitSuccess(false)
-    const request = new Request("https://pleb.school/api/views", {
+    const request = new Request("https://plebdevs.com/api/views", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ key: "views:content:abc123" }),
@@ -107,7 +107,7 @@ describe("/api/views route", () => {
 
   it("increments a valid views key when request passes validation and rate limit", async () => {
     const { POST } = await loadRouteWithRateLimitSuccess(true)
-    const request = new Request("https://pleb.school/api/views", {
+    const request = new Request("https://plebdevs.com/api/views", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ key: "views:content:abc123" }),
@@ -124,14 +124,14 @@ describe("/api/views route", () => {
   it("reads a key by ns/id on GET with rate limiting enforced", async () => {
     const { GET, POST, checkRateLimit } = await loadRouteWithRateLimitSuccess(true)
 
-    const postRequest = new Request("https://pleb.school/api/views", {
+    const postRequest = new Request("https://plebdevs.com/api/views", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ns: "content", id: "abc123" }),
     })
     await POST(postRequest)
 
-    const getRequest = new Request("https://pleb.school/api/views?ns=content&id=abc123", {
+    const getRequest = new Request("https://plebdevs.com/api/views?ns=content&id=abc123", {
       method: "GET",
     })
     const getResponse = await GET(getRequest)

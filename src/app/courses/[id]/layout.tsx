@@ -16,8 +16,8 @@ export async function generateMetadata(
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   if (!uuidRegex.test(id)) {
     return {
-      title: 'Course | pleb.school',
-      description: 'View course on pleb.school',
+      title: 'Course | plebdevs.com',
+      description: 'View course on plebdevs.com',
     }
   }
 
@@ -25,14 +25,14 @@ export async function generateMetadata(
     const course = await CourseAdapter.findByIdWithNote(id)
     if (!course) {
       return {
-        title: 'Course Not Found | pleb.school',
+        title: 'Course Not Found | plebdevs.com',
         description: 'The requested course could not be found.',
       }
     }
 
     // Parse Nostr note if available for richer metadata
     let title = 'Course'
-    let description = 'View course on pleb.school'
+    let description = 'View course on plebdevs.com'
     let image: string | undefined
 
     if (course.note) {
@@ -47,13 +47,13 @@ export async function generateMetadata(
     }
 
     const metadata: Metadata = {
-      title: `${title} | pleb.school`,
+      title: `${title} | plebdevs.com`,
       description: description.slice(0, 160),
       openGraph: {
         title,
         description: description.slice(0, 160),
         type: 'website',
-        siteName: 'pleb.school',
+        siteName: 'plebdevs.com',
         ...(image && { images: [{ url: image }] }),
       },
       twitter: {
@@ -68,8 +68,8 @@ export async function generateMetadata(
   } catch (error) {
     console.error('Error generating course metadata:', error)
     return {
-      title: 'Course | pleb.school',
-      description: 'View course on pleb.school',
+      title: 'Course | plebdevs.com',
+      description: 'View course on plebdevs.com',
     }
   }
 }

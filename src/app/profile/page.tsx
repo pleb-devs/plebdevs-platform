@@ -142,6 +142,6 @@ export default async function ProfilePage() {
 }
 
 export const metadata = {
-  title: 'Profile - pleb.school',
+  title: 'Profile - plebdevs.com',
   description: 'Manage your profile information and preferences'
 }

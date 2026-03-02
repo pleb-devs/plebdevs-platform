@@ -32,7 +32,7 @@ function createRequest({
   token,
   jsonBody,
   rawBody,
-  baseUrl = "https://pleb.school/api/audit/maintenance",
+  baseUrl = "https://plebdevs.com/api/audit/maintenance",
 }: {
   method: "GET" | "POST"
   authorization?: string
@@ -207,7 +207,7 @@ describe("audit maintenance authorization", () => {
       createRequest({
         method: "GET",
         token: "audit-secret",
-        baseUrl: "https://pleb.school/api/audit/maintenance",
+        baseUrl: "https://plebdevs.com/api/audit/maintenance",
       })
     )
 
@@ -222,7 +222,7 @@ describe("audit maintenance authorization", () => {
       createRequest({
         method: "GET",
         token: "audit-secret",
-        baseUrl: "https://pleb.school/api/audit/maintenance",
+        baseUrl: "https://plebdevs.com/api/audit/maintenance",
         hostHeader: "[::1]:3000",
       })
     )

@@ -154,7 +154,7 @@ function buildProductionPlaceholder(
       return `postgresql://placeholder:${hash.slice(0, 16)}@127.0.0.1:5432/placeholder?schema=public`
     case "NEXTAUTH_URL": {
       const host = normalize(raw.VERCEL_URL)?.replace(/^https?:\/\//, "")
-      return host ? `https://${host}` : "https://placeholder.pleb.school"
+      return host ? `https://${host}` : "https://placeholder.plebdevs.com"
     }
     case "PRIVKEY_ENCRYPTION_KEY":
       return hash

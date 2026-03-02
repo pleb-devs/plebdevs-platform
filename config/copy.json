@@ -178,7 +178,7 @@
     "hero": {
       "badge": "Community-first. Open-source by design.",
       "title": "Built with the PlebDevs community, for the PlebDevs community",
-      "description": "PlebDevs is a community-driven instance of the pleb.school platform focused on practical developer education for Bitcoin, Lightning, and Nostr."
+      "description": "PlebDevs is a community-driven platform focused on practical developer education for Bitcoin, Lightning, and Nostr."
     },
     "steps": {
       "fork": {
@@ -216,7 +216,7 @@
         "href": "https://github.com/pleb-devs/plebdevs-platform"
       },
       "secondary": {
-        "label": "View upstream pleb.school",
+        "label": "View upstream repository",
         "href": "https://github.com/AustinKelsay/pleb.school"
       }
     }

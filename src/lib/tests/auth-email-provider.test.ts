@@ -138,7 +138,7 @@ async function loadAuthModuleForEmailTests(params?: {
   if (mutableEnv.NODE_ENV === "production") {
     process.env.DATABASE_URL = "postgresql://user:pass@localhost:5432/pleb_school?schema=public"
     process.env.NEXTAUTH_SECRET = "x".repeat(32)
-    process.env.NEXTAUTH_URL = "https://pleb.school"
+    process.env.NEXTAUTH_URL = "https://plebdevs.com"
     process.env.PRIVKEY_ENCRYPTION_KEY = "ab".repeat(32)
     process.env.VIEWS_CRON_SECRET = "views-cron-secret"
     process.env.AUDIT_LOG_CRON_SECRET = "audit-log-cron-secret"
@@ -292,7 +292,7 @@ describe("auth email provider runtime + magic link flow", () => {
     await expect(
       emailProvider.sendVerificationRequest({
         identifier: "alice@example.com",
-        url: "https://pleb.school/auth/callback/email?token=abc",
+        url: "https://plebdevs.com/auth/callback/email?token=abc",
         provider: {
           server: DEFAULT_RUNTIME_CONFIG.server,
           from: DEFAULT_RUNTIME_CONFIG.from,
@@ -308,7 +308,7 @@ describe("auth email provider runtime + magic link flow", () => {
 
   it("sends magic link email when rate limit passes", async () => {
     const { emailProvider, mocks } = await loadAuthModuleForEmailTests()
-    const magicLinkUrl = "https://pleb.school/auth/callback/email?token=xyz"
+    const magicLinkUrl = "https://plebdevs.com/auth/callback/email?token=xyz"
 
     await emailProvider.sendVerificationRequest({
       identifier: "alice@example.com",
@@ -326,7 +326,7 @@ describe("auth email provider runtime + magic link flow", () => {
       expect.objectContaining({
         to: "alice@example.com",
         from: DEFAULT_RUNTIME_CONFIG.from,
-        subject: "Sign in to pleb.school",
+        subject: "Sign in to plebdevs.com",
         html: expect.stringContaining(magicLinkUrl),
         text: expect.stringContaining(magicLinkUrl),
       })
@@ -344,7 +344,7 @@ describe("auth email provider runtime + magic link flow", () => {
     await expect(
       emailProvider.sendVerificationRequest({
         identifier: "alice@example.com",
-        url: "https://pleb.school/auth/callback/email?token=def",
+        url: "https://plebdevs.com/auth/callback/email?token=def",
         provider: {
           server: DEFAULT_RUNTIME_CONFIG.server,
           from: DEFAULT_RUNTIME_CONFIG.from,
