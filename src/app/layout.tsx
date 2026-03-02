@@ -7,8 +7,48 @@ import { QueryProvider } from "@/contexts/query-provider";
 import { SessionProvider } from "@/contexts/session-provider";
 import { ToastProvider } from "@/hooks/use-toast";
 import { copyConfig } from "@/lib/copy";
+import { availableFonts, completeThemes, defaultThemeName } from "@/lib/theme-config";
+import {
+  getDefaultDarkMode,
+  getDefaultFont,
+  getDefaultTheme as getConfiguredTheme,
+} from "@/lib/theme-ui-config";
 
 const siteFavicon = copyConfig.site.favicon?.trim() || "/favicon.ico";
+
+const configuredThemeName = getConfiguredTheme() || defaultThemeName;
+const configuredTheme =
+  completeThemes.find((theme) => theme.value === configuredThemeName) ??
+  completeThemes.find((theme) => theme.value === defaultThemeName) ??
+  completeThemes[0];
+
+const configuredFont = getDefaultFont();
+const configuredFontDetails = configuredFont
+  ? availableFonts.find((font) => font.value === configuredFont)
+  : null;
+
+const initialFontFamily = configuredFontDetails?.fontFamily || configuredTheme.fontFamily;
+const initialFontWeight = configuredFontDetails?.fontWeight || configuredTheme.fontWeight;
+const configuredDarkMode = getDefaultDarkMode();
+const initialRootColors =
+  configuredDarkMode === true ? configuredTheme.darkColors : configuredTheme.lightColors;
+const sharedThemeVars: Record<string, string> = {
+  "--radius": configuredTheme.borderRadius,
+  "--font-family": initialFontFamily,
+};
+
+function serializeCssVars(vars: Record<string, string>) {
+  return Object.entries(vars)
+    .map(([key, value]) => `${key}: ${value};`)
+    .join("");
+}
+
+const initialThemeCss = `
+html:root{${serializeCssVars({ ...initialRootColors, ...sharedThemeVars })}}
+html.light{${serializeCssVars({ ...configuredTheme.lightColors, ...sharedThemeVars })}}
+html.dark{${serializeCssVars({ ...configuredTheme.darkColors, ...sharedThemeVars })}}
+html body{font-family:${initialFontFamily};font-weight:${initialFontWeight};}
+`;
 
 export const metadata: Metadata = {
   title: "pleb.school – Nostr-native course & content platform",
@@ -39,6 +79,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <style id="initial-theme-vars">{initialThemeCss}</style>
+      </head>
       <body className="antialiased">
         <ConfiguredThemeProvider>
           <ThemeColorProvider>

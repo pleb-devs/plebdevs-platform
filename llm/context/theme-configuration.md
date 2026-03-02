@@ -91,7 +91,15 @@ Manages theme state and applies CSS variables:
 - Updates CSS variables on the `:root` element via `applyCompleteTheme()`
 - Handles font overrides and dark mode toggling
 
-### 4. **CSS Variable Application** (`src/app/globals.css`)
+### 4. **SSR Theme Priming** (`src/app/layout.tsx`)
+To prevent first-paint flashes of the default theme, the root layout preloads the configured instance theme on the server render:
+- Resolves configured defaults from `config/theme.json`
+- Injects an early `<style id="initial-theme-vars">` block with `html:root`, `html.light`, and `html.dark` CSS variables
+- Applies initial font family/weight before hydration
+
+This means hard refresh renders with the instance theme immediately, before client hydration runs.
+
+### 5. **CSS Variable Application** (`src/app/globals.css`)
 Defines the CSS variable structure with OKLCh color space:
 ```css
 :root {
@@ -105,7 +113,7 @@ Defines the CSS variable structure with OKLCh color space:
 }
 ```
 
-### 5. **Component Integration**
+### 6. **Component Integration**
 All shadcn/ui components automatically use these CSS variables:
 - Buttons use `bg-primary` and `text-primary-foreground`
 - Cards use `bg-card` and `border-border`
