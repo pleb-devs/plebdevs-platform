@@ -5,7 +5,7 @@
     "showThemeToggle": true
   },
   "defaults": {
-    "theme": "starry-night",
+    "theme": "plebdevs",
     "font": "system-mono",
     "darkMode": true
   },
@@ -18,6 +18,7 @@
     "ui.showThemeToggle": "Show/hide light/dark mode toggle (next-themes). When hidden, users cannot manually switch light/dark.",
     "defaults": "Default selections — set initial theme/font/darkMode for branded deployments. These act as defaults; to lock them, hide the corresponding toggles in ui.*.",
     "defaults.theme": "Default complete theme (e.g., 'cosmic-night', 'elegant-luxury'). null = use saved user choice (localStorage) or library default. Does NOT lock selection by itself — hide selector to lock.",
+    "_local_customization_note": "This deployment uses a fork-only `plebdevs` theme defined in src/lib/theme-config.ts. Keep it during upstream syncs or resolve conflicts in favor of retaining it.",
     "defaults.font": "Default font (e.g., 'inter', 'poppins'). null = use saved user choice or theme default. Does NOT lock selection by itself — hide font toggle to lock.",
     "defaults.darkMode": "Default light/dark preference. true = start dark, false = start light, null = 'system'. Does NOT lock selection by itself — hide theme toggle to lock.",
     "_priority": "Priority: user localStorage (if present) > defaults.* (theme/font/darkMode) > library/system defaults.",

@@ -47,6 +47,11 @@ export type ThemeName =
   | "ocean-breeze"
   | "orange"
   | "perpetuity"
+  // LOCAL CUSTOMIZATION NOTE:
+  // `plebdevs` is a deployment-specific theme for plebdevs.com.
+  // When syncing from upstream pleb.school, keep this value and corresponding
+  // theme object below, or resolve merge conflicts in favor of retaining it.
+  | "plebdevs"
   | "quick-pink"
   | "razzmatazz"
   | "red"
@@ -1884,6 +1889,87 @@ export const completeThemes: CompleteTheme[] = [
       "--sidebar-accent-foreground": "oklch(0.9850 0 0)",
       "--sidebar-border": "oklch(0.2750 0 0)",
       "--sidebar-ring": "oklch(0.4390 0 0)",
+    }
+  },
+  // LOCAL CUSTOMIZATION NOTE (plebdevs.com):
+  // This theme is intentionally maintained in this fork and may conflict during
+  // upstream pleb.school syncs. Keep this block unless intentionally removing
+  // PlebDevs branding.
+  {
+    name: "PlebDevs",
+    value: "plebdevs",
+    description: "PlebDevs brand theme based on default with a green primary accent",
+    fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif",
+    fontWeight: "400",
+    borderRadius: "0.625rem",
+    style: "default",
+    lightColors: {
+      "--background": "oklch(1 0 0)",
+      "--foreground": "oklch(0.1450 0 0)",
+      "--card": "oklch(1 0 0)",
+      "--card-foreground": "oklch(0.1450 0 0)",
+      "--popover": "oklch(1 0 0)",
+      "--popover-foreground": "oklch(0.1450 0 0)",
+      "--primary": "#00bf63",
+      "--primary-foreground": "#022313",
+      "--secondary": "oklch(0.9700 0 0)",
+      "--secondary-foreground": "oklch(0.2050 0 0)",
+      "--muted": "oklch(0.9700 0 0)",
+      "--muted-foreground": "oklch(0.5560 0 0)",
+      "--accent": "#e8fff3",
+      "--accent-foreground": "#025a31",
+      "--destructive": "oklch(0.5770 0.2450 27.3250)",
+      "--destructive-foreground": "oklch(1 0 0)",
+      "--border": "oklch(0.9220 0 0)",
+      "--input": "oklch(0.9220 0 0)",
+      "--ring": "#00bf63",
+      "--chart-1": "#00bf63",
+      "--chart-2": "#00a856",
+      "--chart-3": "#008a47",
+      "--chart-4": "#2fd97f",
+      "--chart-5": "#6de8a7",
+      "--sidebar": "oklch(0.9850 0 0)",
+      "--sidebar-foreground": "oklch(0.1450 0 0)",
+      "--sidebar-primary": "#00bf63",
+      "--sidebar-primary-foreground": "#022313",
+      "--sidebar-accent": "#e8fff3",
+      "--sidebar-accent-foreground": "#025a31",
+      "--sidebar-border": "oklch(0.9220 0 0)",
+      "--sidebar-ring": "#00bf63",
+    },
+    darkColors: {
+      "--background": "oklch(0.1450 0 0)",
+      "--foreground": "oklch(0.9850 0 0)",
+      "--card": "oklch(0.2050 0 0)",
+      "--card-foreground": "oklch(0.9850 0 0)",
+      "--popover": "oklch(0.2690 0 0)",
+      "--popover-foreground": "oklch(0.9850 0 0)",
+      "--primary": "#00bf63",
+      "--primary-foreground": "#022313",
+      "--secondary": "oklch(0.2690 0 0)",
+      "--secondary-foreground": "oklch(0.9850 0 0)",
+      "--muted": "oklch(0.2690 0 0)",
+      "--muted-foreground": "oklch(0.7080 0 0)",
+      "--accent": "#143426",
+      "--accent-foreground": "#9df4ca",
+      "--destructive": "oklch(0.7040 0.1910 22.2160)",
+      "--destructive-foreground": "oklch(0.9850 0 0)",
+      "--border": "oklch(0.2750 0 0)",
+      "--input": "oklch(0.3250 0 0)",
+      "--ring": "#00bf63",
+      "--chart-1": "#00bf63",
+      "--chart-2": "#00a856",
+      "--chart-3": "#008a47",
+      "--chart-4": "#2fd97f",
+      "--chart-5": "#6de8a7",
+      "--sidebar": "oklch(0.2050 0 0)",
+      "--sidebar-foreground": "oklch(0.9850 0 0)",
+      "--sidebar-primary": "#00bf63",
+      "--sidebar-primary-foreground": "#022313",
+      "--sidebar-accent": "#143426",
+      "--sidebar-accent-foreground": "#9df4ca",
+      "--sidebar-border": "oklch(0.2750 0 0)",
+      "--sidebar-ring": "#00bf63",
     }
   },
   {

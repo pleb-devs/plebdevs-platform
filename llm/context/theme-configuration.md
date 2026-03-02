@@ -70,7 +70,7 @@ When creating new components:
 ## How the Theme System Works
 
 ### 1. **Theme Configuration** (`src/lib/theme-config.ts`)
-Contains 67 complete theme definitions, each with:
+Contains 68 complete theme definitions, each with:
 - Light and dark color schemes (32 OKLCh color variables each)
 - Associated font configuration with optional Google Fonts URL
 - Border radius preference
@@ -199,7 +199,7 @@ This keeps production builds/deploys deterministic by removing hard dependency o
 ## Benefits of This Approach
 
 1. **Consistency**: All components share the same design tokens
-2. **Flexibility**: Switch between 67 themes instantly
+2. **Flexibility**: Switch between 68 themes instantly
 3. **Maintainability**: Update colors in one place, affect entire app
 4. **Performance**: CSS variables are highly optimized by browsers
 5. **Accessibility**: Centralized tokens make contrast auditing possible (not automatically enforced)
@@ -328,11 +328,13 @@ Set default theme, font, or dark mode settings:
 }
 ```
 
-## Available Themes (67 total)
+## Available Themes (68 total)
+
+`plebdevs` is a fork-local custom theme used by the PlebDevs deployment. Keep this theme during upstream syncs unless intentionally removing PlebDevs branding.
 
 You can set `defaults.theme` to any of these values (from `completeThemes` in `src/lib/theme-config.ts`):
 
-`amber-minimal`, `amethyst`, `amethyst-haze`, `astral`, `blaze`, `blue`, `bold-tech`, `bubblegum`, `caffeine`, `calypso`, `candyland`, `canvas`, `catppuccin`, `citrus`, `claude`, `claymorphism`, `clean-slate`, `cosmic-night`, `cyberpunk`, `default`, `doom64`, `elegant-luxury`, `emerald`, `forest`, `graphite`, `gray`, `green`, `miami`, `midnight-bloom`, `mocha-mousse`, `modern-minimal`, `mono`, `nature`, `neo-brutalism`, `neutral`, `new-york`, `northern-lights`, `notebook`, `ocean-breeze`, `orange`, `perpetuity`, `quick-pink`, `razzmatazz`, `red`, `retro-arcade`, `rose`, `santa-fe`, `sky`, `slate`, `soft-pop`, `solar`, `solar-dusk`, `spooky`, `spring-bouquet`, `starry-night`, `stone`, `sunset-horizon`, `supabase`, `twitter`, `typewriter`, `underground`, `vercel`, `violet`, `violet-bloom`, `xanadu`, `yellow`, `zinc`.
+`amber-minimal`, `amethyst`, `amethyst-haze`, `astral`, `blaze`, `blue`, `bold-tech`, `bubblegum`, `caffeine`, `calypso`, `candyland`, `canvas`, `catppuccin`, `citrus`, `claude`, `claymorphism`, `clean-slate`, `cosmic-night`, `cyberpunk`, `default`, `doom64`, `elegant-luxury`, `emerald`, `forest`, `graphite`, `gray`, `green`, `miami`, `midnight-bloom`, `mocha-mousse`, `modern-minimal`, `mono`, `nature`, `neo-brutalism`, `neutral`, `new-york`, `northern-lights`, `notebook`, `ocean-breeze`, `orange`, `perpetuity`, `plebdevs`, `quick-pink`, `razzmatazz`, `red`, `retro-arcade`, `rose`, `santa-fe`, `sky`, `slate`, `soft-pop`, `solar`, `solar-dusk`, `spooky`, `spring-bouquet`, `starry-night`, `stone`, `sunset-horizon`, `supabase`, `twitter`, `typewriter`, `underground`, `vercel`, `violet`, `violet-bloom`, `xanadu`, `yellow`, `zinc`.
 
 Descriptions live inline in `src/lib/theme-config.ts`.
 
@@ -451,7 +453,7 @@ This allows users to customize their experience while still respecting config de
 The pleb.school theme system represents a modern approach to application theming that prioritizes:
 
 ### **Developer Experience**
-- Write components once, support 67 themes automatically
+- Write components once, support 68 themes automatically
 - No need to think about colors when building features
 - Consistent patterns across the entire codebase
 - Easy onboarding for developers familiar with shadcn/ui
