@@ -224,7 +224,7 @@
     "description": "A one-of-a-kind developer education, content, and community platform built on Nostr and fully Lightning integrated.",
     "brandName": "PlebDevs",
     "brandImage": "https://plebdevs-bucket.nyc3.cdn.digitaloceanspaces.com/images/plebdevs/plebdevs-icon-no-text.png",
-    "favicon": "https://plebdevs-bucket.nyc3.cdn.digitaloceanspaces.com/images/plebdevs/plebdevs-icon-no-text.png"
+    "favicon": "https://plebdevs-bucket.nyc3.cdn.digitaloceanspaces.com/images/plebdevs/plebdevs-icon-circle-no-text.png"
   },
   "navigation": {
     "searchPlaceholder": "Search courses, videos, docs",
@@ -262,12 +262,12 @@
     },
     "stats": {
       "students": {
-        "value": "500+",
-        "label": "Students enrolled",
+        "value": "1000+",
+        "label": "Students enrolled & supported",
         "icon": "Users"
       },
       "contentTypes": {
-        "value": "Courses · Videos · Docs",
+        "value": "Content / Courses",
         "label": "Nostr-native content formats",
         "icon": "BookOpen"
       },
