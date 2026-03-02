@@ -89,8 +89,8 @@ export function SearchContentCard({
               </div>
             )}
             
-            {/* Content type icon overlay */}
-            <div className="absolute top-1 left-1 p-1 rounded bg-background/80 backdrop-blur-sm">
+            {/* Content type icon overlay (always visible on touch, hover/focus on pointer devices) */}
+            <div className="thumbnail-type-overlay absolute top-1 left-1 p-1 rounded bg-background/80 backdrop-blur-sm transition-opacity duration-200 pointer-events-none">
               {(() => {
                 const IconComponent = contentTypeIcons[item.type] || BookOpen
                 return <IconComponent className="h-3 w-3 text-foreground" />
