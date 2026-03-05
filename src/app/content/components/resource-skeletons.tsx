@@ -27,15 +27,38 @@ export function ResourceSidebarSkeleton() {
   return (
     <Card>
       <CardHeader>
-        <Skeleton className="h-5 w-32 rounded-md" />
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-5 w-36 rounded-md" />
+          <Skeleton className="hidden lg:block h-8 w-8 rounded-md" />
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="space-y-2">
-            <Skeleton className="h-4 w-24 rounded-md" />
-            <Skeleton className="h-4 w-32 rounded-md" />
-          </div>
-        ))}
+        {/* Author */}
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-16 rounded-md" />
+          <Skeleton className="h-4 w-28 rounded-md" />
+        </div>
+        {/* Type */}
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-12 rounded-md" />
+          <Skeleton className="h-4 w-20 rounded-md" />
+        </div>
+        {/* Category */}
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-20 rounded-md" />
+          <Skeleton className="h-4 w-24 rounded-md" />
+        </div>
+        {/* Views */}
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-14 rounded-md" />
+          <Skeleton className="h-4 w-16 rounded-md" />
+        </div>
+        {/* Created */}
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-20 rounded-md" />
+          <Skeleton className="h-4 w-32 rounded-md" />
+        </div>
+        {/* Nostr link button */}
         <Skeleton className="h-10 w-full rounded-md" />
       </CardContent>
     </Card>
@@ -44,54 +67,73 @@ export function ResourceSidebarSkeleton() {
 
 export function ResourcePageSkeleton() {
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       {/* Header */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-start">
         <div className="space-y-6">
-          <div className="flex flex-wrap gap-2">
-            <Skeleton className="h-6 w-20 rounded-full" />
-            <Skeleton className="h-6 w-16 rounded-full" />
-            <Skeleton className="h-6 w-24 rounded-full" />
-          </div>
-
-          <div className="space-y-3">
-            <Skeleton className="h-10 w-full max-w-xl rounded-md" />
-            <Skeleton className="h-4 w-full rounded-md" />
-            <Skeleton className="h-4 w-5/6 rounded-md" />
-            <Skeleton className="h-4 w-2/3 rounded-md" />
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <MetaChipSkeleton width="w-28" />
-            <MetaChipSkeleton width="w-24" />
-            <MetaChipSkeleton width="w-24" />
-            <MetaChipSkeleton width="w-20" />
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Skeleton className="h-11 w-full sm:w-48 rounded-md" />
-            <Skeleton className="h-11 w-full sm:w-40 rounded-md" />
-            <Skeleton className="h-6 w-32 sm:w-28 rounded-full" />
-          </div>
-
+          {/* Badges - matches actual: category + type */}
           <div className="space-y-2">
-            <Skeleton className="h-5 w-24 rounded-md" />
+            <div className="flex items-center flex-wrap gap-2">
+              <Skeleton className="h-6 w-20 rounded-full" />
+              <Skeleton className="h-6 w-16 rounded-full" />
+            </div>
+            {/* Title */}
+            <Skeleton className="h-10 w-full max-w-xl" />
+            {/* Description */}
+            <div className="space-y-1">
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-5/6" />
+              <Skeleton className="h-5 w-2/3" />
+            </div>
+          </div>
+
+          {/* Interaction metrics - matches actual: 3 metrics + views */}
+          <div className="flex items-center flex-wrap gap-4 sm:gap-6">
+            <div className="flex items-center space-x-1.5">
+              <Skeleton className="h-5 w-5 rounded-full" />
+              <Skeleton className="h-4 w-12" />
+            </div>
+            <div className="flex items-center space-x-1.5">
+              <Skeleton className="h-5 w-5 rounded-full" />
+              <Skeleton className="h-4 w-8" />
+            </div>
+            <div className="flex items-center space-x-1.5">
+              <Skeleton className="h-5 w-5 rounded-full" />
+              <Skeleton className="h-4 w-8" />
+            </div>
+            <div className="flex items-center space-x-1.5">
+              <Skeleton className="h-5 w-5 rounded-full" />
+              <Skeleton className="h-4 w-16" />
+            </div>
+          </div>
+
+          {/* CTA button */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+            <Skeleton className="h-11 w-full sm:w-48 rounded-md" />
+          </div>
+
+          {/* Topics */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-4 rounded-sm" />
+              <Skeleton className="h-5 w-16" />
+            </div>
             <div className="flex flex-wrap gap-2">
-              {Array.from({ length: 7 }).map((_, i) => (
-                <Skeleton key={i} className="h-7 w-16 rounded-full" />
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-6 w-16 rounded-full" />
               ))}
             </div>
           </div>
         </div>
 
         <div className="relative">
-          <Skeleton className="aspect-video w-full rounded-xl" />
+          <Skeleton className="aspect-video w-full rounded-lg" />
         </div>
       </div>
 
       {/* Content & Sidebar */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="space-y-6">
           <ResourceOverviewCardSkeleton />
         </div>
         <div className="space-y-6">
@@ -131,7 +173,6 @@ export function ResourceContentViewSkeleton() {
           <div className="flex flex-wrap gap-2">
             <Skeleton className="h-6 w-20 rounded-full" />
             <Skeleton className="h-6 w-16 rounded-full" />
-            <Skeleton className="h-6 w-20 rounded-full" />
           </div>
 
           <div className="space-y-3">
@@ -141,25 +182,16 @@ export function ResourceContentViewSkeleton() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <MetaChipSkeleton width="w-32" />
             <MetaChipSkeleton width="w-28" />
-            <MetaChipSkeleton width="w-28" />
-            <MetaChipSkeleton width="w-20" />
+            <MetaChipSkeleton width="w-24" />
+            <MetaChipSkeleton width="w-24" />
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
             <Skeleton className="h-11 w-full sm:w-48 rounded-md" />
-            <Skeleton className="h-11 w-full sm:w-40 rounded-md" />
           </div>
         </CardContent>
       </Card>
-
-      {/* Interaction chips */}
-      <div className="flex flex-wrap gap-3">
-        <MetaChipSkeleton width="w-28" />
-        <MetaChipSkeleton width="w-24" />
-        <MetaChipSkeleton width="w-24" />
-      </div>
 
       {/* Body */}
       <Card>
