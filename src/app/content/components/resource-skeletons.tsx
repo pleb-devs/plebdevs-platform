@@ -27,7 +27,10 @@ export function ResourceSidebarSkeleton() {
   return (
     <Card>
       <CardHeader>
-        <Skeleton className="h-5 w-36 rounded-md" />
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-5 w-36 rounded-md" />
+          <Skeleton className="hidden lg:block h-8 w-8 rounded-md" />
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Author */}
@@ -128,14 +131,9 @@ export function ResourcePageSkeleton() {
         </div>
       </div>
 
-      {/* Full width toggle */}
-      <div className="flex justify-end">
-        <Skeleton className="h-9 w-32 rounded-md" />
-      </div>
-
       {/* Content & Sidebar */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="space-y-6">
           <ResourceOverviewCardSkeleton />
         </div>
         <div className="space-y-6">

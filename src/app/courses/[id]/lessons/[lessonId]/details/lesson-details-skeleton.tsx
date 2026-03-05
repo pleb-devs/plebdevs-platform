@@ -63,7 +63,10 @@ export const LessonDetailsSkeleton = () => {
         </div>
         <Card>
           <CardHeader>
-            <Skeleton className="h-5 w-32" />
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="hidden lg:block h-8 w-8 rounded-md" />
+            </div>
           </CardHeader>
           <CardContent className="space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
