@@ -70,7 +70,7 @@
       "courses": {
         "enabled": true,
         "title": "Courses",
-        "description": "Structured learning paths from Bitcoin fundamentals to advanced Lightning Network development",
+        "description": "Structured learning paths from coding fundamentals to advanced application development using Bitcoin and Nostr",
         "filters": {
           "priceFilter": "all",
           "categories": [],
@@ -90,7 +90,7 @@
       "documents": {
         "enabled": true,
         "title": "Documents",
-        "description": "Documents and educational materials for Bitcoin development",
+        "description": "Documents and educational materials for Bitcoin, Nostr, and AI development",
         "filters": {
           "priceFilter": "all",
           "categories": [],
@@ -110,7 +110,7 @@
       "videos": {
         "enabled": true,
         "title": "Videos",
-        "description": "Video lessons and workshops from Bitcoin developers and experts",
+        "description": "Video lessons and workshops focusing on Bitcoin, Nostr, and AI development",
         "filters": {
           "priceFilter": "all",
           "categories": [],
