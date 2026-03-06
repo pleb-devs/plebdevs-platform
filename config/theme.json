@@ -2,7 +2,7 @@
   "ui": {
     "showThemeSelector": false,
     "showFontToggle": false,
-    "showThemeToggle": true
+    "showThemeToggle": false
   },
   "defaults": {
     "theme": "plebdevs",
