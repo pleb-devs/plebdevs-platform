@@ -251,8 +251,8 @@
         "line1": "Learn to code",
         "line2": "Build on",
         "useAnimated": true,
-        "animatedWords": ["Bitcoin", "Lightning", "Nostr"],
-        "staticWord": "Bitcoin",
+        "animatedWords": ["Bitcoin", "Lightning", "Nostr", "AI"],
+        "staticWord": "AI",
         "line3": "Become a dev"
       },
       "description": "A one-of-a-kind developer education, content, and community platform built on Nostr and fully Lightning integrated.",

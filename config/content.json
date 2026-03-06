@@ -163,9 +163,8 @@
       "nostr",
       "frontend",
       "backend",
-      "mobile",
       "security",
-      "web3"
+      "ai"
     ],
     "priceFilterOptions": {
       "all": "All Content",
