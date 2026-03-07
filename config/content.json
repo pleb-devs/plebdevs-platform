@@ -90,7 +90,7 @@
       "documents": {
         "enabled": true,
         "title": "Documents",
-        "description": "Documents and educational materials for Bitcoin, Nostr, and AI development",
+        "description": "Documents, Guides, Cheatsheets, and other materials for Bitcoin, Nostr, and AI development",
         "filters": {
           "priceFilter": "all",
           "categories": [],
