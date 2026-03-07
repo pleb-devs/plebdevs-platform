@@ -18,8 +18,8 @@
       "watchDemo": "Video",
       "ctaPrimary": "Sparkles",
       "ctaSecondary": "ExternalLink",
-      "visualPrimary": "Eye",
-      "visualSecondary": "Settings",
+      "visualPrimary": "Zap",
+      "visualSecondary": "RadioTower",
       "visualCenter": "Zap"
     },
     "about": {
@@ -289,8 +289,8 @@
       "screenLabel": "Build on Bitcoin",
       "videoUrl": "https://plebdevs-bucket.nyc3.cdn.digitaloceanspaces.com/videos/plebdevs/plebdevs-ai-teaser-1.5.mp4",
       "videoPoster": "",
-      "primaryBadge": "Nostr-native",
-      "secondaryBadge": "Lightning first"
+      "primaryBadge": "Lightning enabled",
+      "secondaryBadge": "Nostr Native"
     },
     "cta": {
       "title": "All PlebDevs content is free to access",

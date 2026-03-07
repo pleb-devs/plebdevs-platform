@@ -10,8 +10,6 @@ import {
   ExternalLink,
   Sparkles,
   CheckCircle,
-  Eye,
-  Settings
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import * as Icons from "lucide-react"
@@ -21,6 +19,7 @@ import { CoursesSection } from "@/components/homepage/courses-section"
 import { VideosSection } from "@/components/homepage/videos-section"
 import { DocumentsSection } from "@/components/homepage/documents-section"
 import { HomepageWithPrefetch } from "@/components/homepage/homepage-with-prefetch"
+import { getHomepageIcon } from "@/lib/copy-icons"
 import { useCopy } from "@/lib/copy"
 import { getEnabledHomepageSections } from "@/lib/content-config"
 
@@ -29,6 +28,9 @@ interface HeroStat {
   label: string
   icon: LucideIcon
 }
+
+const HOMEPAGE_VISUAL_PRIMARY_ICON = getHomepageIcon("visualPrimary")
+const HOMEPAGE_VISUAL_SECONDARY_ICON = getHomepageIcon("visualSecondary")
 
 type HomepageStatConfig = {
   value: string
@@ -207,7 +209,7 @@ export default function Home() {
               <div className="absolute -top-1 sm:-top-2 lg:-top-4 -right-1 sm:-right-2 lg:-right-4 z-10">
                 <Card className="w-28 sm:w-32 lg:w-36 p-1.5 sm:p-2 lg:p-3 cursor-pointer hover:shadow-md transition-shadow">
                   <div className="flex items-center space-x-2">
-                    <Eye className="h-2.5 sm:h-3 lg:h-4 w-2.5 sm:w-3 lg:w-4 text-primary" />
+                    <HOMEPAGE_VISUAL_PRIMARY_ICON className="h-2.5 sm:h-3 lg:h-4 w-2.5 sm:w-3 lg:w-4 text-primary" />
                     <span className="text-xs font-medium">{homepage.visual.primaryBadge}</span>
                   </div>
                 </Card>
@@ -216,7 +218,7 @@ export default function Home() {
               <div className="absolute -bottom-1 sm:-bottom-2 lg:-bottom-4 -left-1 sm:-left-2 lg:-left-4 z-10">
                 <Card className="w-32 sm:w-36 lg:w-40 p-1.5 sm:p-2 lg:p-3 cursor-pointer hover:shadow-md transition-shadow">
                   <div className="flex items-center space-x-2">
-                    <Settings className="h-2.5 sm:h-3 lg:h-4 w-2.5 sm:w-3 lg:w-4 text-primary" />
+                    <HOMEPAGE_VISUAL_SECONDARY_ICON className="h-2.5 sm:h-3 lg:h-4 w-2.5 sm:w-3 lg:w-4 text-primary" />
                     <span className="text-xs font-medium">{homepage.visual.secondaryBadge}</span>
                   </div>
                 </Card>
