@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { NextRequest } from "next/server"
 import { config as middlewareConfig, middleware } from "../../../middleware"
+import { RELAY_ALLOWLIST } from "../nostr-relays"
 
 type RequestOptions = {
   method: string
@@ -29,6 +30,7 @@ function createRequest(options: RequestOptions): NextRequest {
 }
 
 const originalAllowedOrigins = process.env.ALLOWED_ORIGINS
+const originalAllowedRelays = process.env.ALLOWED_RELAYS
 const originalNodeEnv = process.env.NODE_ENV
 const originalRemoteFontsFlag = process.env.NEXT_PUBLIC_ENABLE_REMOTE_FONTS
 const mutableEnv = process.env as Record<string, string | undefined>
@@ -43,6 +45,11 @@ afterAll(() => {
     delete process.env.ALLOWED_ORIGINS
   } else {
     process.env.ALLOWED_ORIGINS = originalAllowedOrigins
+  }
+  if (originalAllowedRelays === undefined) {
+    delete process.env.ALLOWED_RELAYS
+  } else {
+    process.env.ALLOWED_RELAYS = originalAllowedRelays
   }
   if (originalNodeEnv === undefined) {
     delete mutableEnv.NODE_ENV
@@ -186,6 +193,47 @@ describe("middleware CORS preflight handling", () => {
     expect(response.headers.get("Access-Control-Allow-Methods")).toBeNull()
     expect(response.headers.get("Access-Control-Allow-Headers")).toBeNull()
     expect(response.headers.get("Content-Security-Policy")).toContain("default-src 'self'")
+  })
+
+  it("includes the canonical relay allowlist in CSP connect-src", () => {
+    delete process.env.ALLOWED_RELAYS
+
+    const request = createRequest({
+      method: "GET",
+      path: "/profile",
+    })
+
+    const response = middleware(request)
+    const csp = response.headers.get("Content-Security-Policy") ?? ""
+
+    expect(csp).toContain("connect-src")
+    for (const relay of RELAY_ALLOWLIST) {
+      expect(csp).toContain(relay)
+    }
+  })
+
+  it("sanitizes ALLOWED_RELAYS before adding them to CSP connect-src", () => {
+    process.env.ALLOWED_RELAYS = [
+      " relay.example.com:7447 ",
+      "https://api.example.com/path",
+      "bad.example.com;img-src https://evil.example.com",
+      "\"quoted.example.com\"",
+      "wss://relay2.example.com/",
+    ].join(",")
+
+    const request = createRequest({
+      method: "GET",
+      path: "/profile",
+    })
+
+    const response = middleware(request)
+    const csp = response.headers.get("Content-Security-Policy") ?? ""
+
+    expect(csp).toContain("wss://relay.example.com:7447")
+    expect(csp).toContain("wss://relay2.example.com")
+    expect(csp).not.toContain("https://api.example.com")
+    expect(csp).not.toContain("bad.example.com;img-src")
+    expect(csp).not.toContain("quoted.example.com")
   })
 
   it("documents matcher exclusion for /api/auth routes", () => {
