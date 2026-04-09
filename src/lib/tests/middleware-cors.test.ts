@@ -212,6 +212,30 @@ describe("middleware CORS preflight handling", () => {
     expect(csp).toContain("wss://nostr.land")
   })
 
+  it("sanitizes ALLOWED_RELAYS before adding them to CSP connect-src", () => {
+    process.env.ALLOWED_RELAYS = [
+      " relay.example.com:7447 ",
+      "https://api.example.com/path",
+      "bad.example.com;img-src https://evil.example.com",
+      "\"quoted.example.com\"",
+      "wss://relay2.example.com/",
+    ].join(",")
+
+    const request = createRequest({
+      method: "GET",
+      path: "/profile",
+    })
+
+    const response = middleware(request)
+    const csp = response.headers.get("Content-Security-Policy") ?? ""
+
+    expect(csp).toContain("wss://relay.example.com:7447")
+    expect(csp).toContain("wss://relay2.example.com")
+    expect(csp).not.toContain("https://api.example.com")
+    expect(csp).not.toContain("bad.example.com;img-src")
+    expect(csp).not.toContain("quoted.example.com")
+  })
+
   it("documents matcher exclusion for /api/auth routes", () => {
     const matchers = Array.isArray(middlewareConfig.matcher) ? middlewareConfig.matcher : []
     expect(matchers.length).toBeGreaterThan(0)

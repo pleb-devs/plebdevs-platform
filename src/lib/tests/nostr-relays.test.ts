@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 import nostrConfig from "../../../config/nostr.json"
 import { DEFAULT_RELAYS, RELAY_ALLOWLIST, getRelays } from "../nostr-relays"
@@ -21,4 +21,29 @@ describe("nostr relay configuration", () => {
     expect(RELAY_ALLOWLIST).toEqual(expect.arrayContaining(CANONICAL_RELAYS))
     expect(new Set(RELAY_ALLOWLIST).size).toBe(RELAY_ALLOWLIST.length)
   })
+
+  it("ignores non-string relay entries in malformed config arrays", async () => {
+    vi.resetModules()
+    vi.doMock("../../../config/nostr.json", () => ({
+      default: {
+        relays: {
+          default: ["wss://nos.lol", 42, null, "  wss://relay.damus.io  ", ""],
+          custom: [false, "wss://nostr.land"],
+        },
+      },
+    }))
+
+    const relaysModule = await import("../nostr-relays")
+
+    expect(relaysModule.DEFAULT_RELAYS).toEqual(["wss://nos.lol", "wss://relay.damus.io"])
+    expect(relaysModule.RELAY_ALLOWLIST).toEqual([
+      "wss://nos.lol",
+      "wss://relay.damus.io",
+      "wss://nostr.land",
+    ])
+  })
+})
+
+afterEach(() => {
+  vi.doUnmock("../../../config/nostr.json")
 })

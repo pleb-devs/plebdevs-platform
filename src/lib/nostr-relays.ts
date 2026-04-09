@@ -4,15 +4,20 @@ export type RelaySet = 'default' | 'content' | 'profile' | 'zapThreads'
 type RelayConfigKey = RelaySet | 'custom'
 
 type NostrRelayConfig = {
-  relays?: Partial<Record<RelayConfigKey, string[]>>
+  relays?: Partial<Record<RelayConfigKey, unknown[]>>
 }
 
 export function unique(list: string[]): string[] {
   return Array.from(new Set(list))
 }
 
-function normalizeRelayList(relays?: string[]): string[] {
-  return unique((relays ?? []).map((url) => url.trim()).filter(Boolean))
+function normalizeRelayList(relays?: readonly unknown[]): string[] {
+  return unique(
+    (relays ?? [])
+      .filter((url): url is string => typeof url === 'string')
+      .map((url) => url.trim())
+      .filter(Boolean)
+  )
 }
 
 const relayConfig = (nostrConfig as NostrRelayConfig).relays ?? {}
