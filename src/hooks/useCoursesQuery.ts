@@ -347,8 +347,8 @@ export async function fetchCoursesWithNotes(
  * Fetch a single course with its lessons and Nostr note
  */
 export async function fetchCourseWithLessons(courseId: string, relayPool: RelayPool, relays: string[]): Promise<CourseWithLessons | null> {
-  // Fetch course with lessons from API
-  const response = await fetch(`/api/courses/${courseId}`)
+  // Fetch course metadata only; lesson structure is loaded separately via useLessonsQuery.
+  const response = await fetch(`/api/courses/${courseId}?includeLessons=false`)
   if (!response.ok) {
     return null
   }
@@ -360,79 +360,28 @@ export async function fetchCourseWithLessons(courseId: string, relayPool: RelayP
   }
 
   const courseWithNote = data
-  const lessons = data.lessons || []
+  let courseNote: NostrEvent | undefined
+  let noteError: string | undefined
 
-  // Extract resources from lessons
-  const resources = lessons
-    .filter((lesson: any) => lesson.resource)
-    .map((lesson: any) => lesson.resource)
+  try {
+    logger.debug("Fetching course note from Nostr", { courseId })
+    const notes = await relayPool.querySync(
+      relays,
+      { "#d": [courseId], kinds: [30004, 30023, 30402] },
+      { timeout: 5000 }
+    )
 
-  // Create a map of resources by ID for quick lookup
-  const resourcesMap = new Map<string, ResourceWithNote>()
-  resources.forEach((resource: ResourceWithNote) => resourcesMap.set(resource.id, resource))
-
-  // Extract resource IDs
-  const resourceIds = resources.map((r: any) => r.id)
-
-  // Collect all IDs that need Nostr notes fetched (course ID + resource IDs)
-  const idsToFetch = [courseId, ...resourceIds]
-
-  // Fetch notes by 'd' tag in one batch query
-  if (idsToFetch.length > 0) {
-    try {
-      logger.debug('Fetching course + lesson notes from Nostr', { count: idsToFetch.length })
-      
-      const notes = await relayPool.querySync(
-        relays,
-        { "#d": idsToFetch, kinds: [30004, 30023, 30402] }, // Course lists and content events
-        { timeout: 5000 } // Reduced timeout for faster failures
-      )
-      
-      logger.debug('Fetched course + lesson notes from Nostr', { count: notes.length })
-      
-      const notesMap = new Map<string, NostrEvent>()
-      notes.forEach(note => {
-        const dTag = note.tags.find(tag => tag[0] === 'd')
-        if (dTag && dTag[1]) {
-          notesMap.set(dTag[1], note)
-        }
-      })
-      
-      // Update course note if found
-      if (notesMap.has(courseId)) {
-        courseWithNote.note = notesMap.get(courseId)
-      }
-      
-      // Update resource notes if found
-      resources.forEach((resource: ResourceWithNote) => {
-        if (notesMap.has(resource.id)) {
-          resource.note = notesMap.get(resource.id)
-          resourcesMap.set(resource.id, resource)
-        }
-      })
-    } catch (error) {
-      console.error('Failed to fetch notes for course and lessons:', error)
-      if (courseWithNote.noteId && !courseWithNote.note) {
-        courseWithNote.noteError = error instanceof Error ? error.message : 'Failed to fetch note'
-      }
-      resources.forEach((resource: ResourceWithNote) => {
-        if (resource.noteId && !resource.note) {
-          resource.noteError = error instanceof Error ? error.message : 'Failed to fetch note'
-          resourcesMap.set(resource.id, resource)
-        }
-      })
-    }
+    courseNote = notes.find((note) => note.tags.some((tag) => tag[0] === "d" && tag[1] === courseId))
+  } catch (error) {
+    console.error("Failed to fetch course note from real Nostr:", error)
+    noteError = error instanceof Error ? error.message : "Failed to fetch note"
   }
-
-  // Create lessons with their associated resources
-  const lessonsWithResources: LessonWithResource[] = lessons.map((lesson: any) => ({
-    ...lesson,
-    resource: lesson.resourceId ? resourcesMap.get(lesson.resourceId) : undefined
-  }))
 
   return {
     ...courseWithNote,
-    lessons: lessonsWithResources.sort((a, b) => a.index - b.index)
+    note: courseNote,
+    noteError: courseNote ? undefined : noteError,
+    lessons: [],
   }
 }
 

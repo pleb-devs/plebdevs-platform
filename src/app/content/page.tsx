@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect, useRef } from "react"
+import { useMemo, useState } from "react"
 import {
   Crown,
   Filter,
@@ -8,7 +8,6 @@ import {
   FileText,
   Gift
 } from "lucide-react"
-import { Prefix, type NostrEvent, type RelayPool } from "snstr"
 import { MainLayout } from "@/components/layout/main-layout"
 import { Section } from "@/components/layout/section"
 import { Badge } from "@/components/ui/badge"
@@ -25,68 +24,10 @@ import { tagsToAdditionalLinks } from "@/lib/additional-links"
 import { trackEventSafe } from "@/lib/analytics"
 import { useCopy, getCopy } from "@/lib/copy"
 import { getEventATag } from "@/lib/nostr-a-tag"
-import { NostrFetchService } from "@/lib/nostr-fetch-service"
 import { getNoteImage } from "@/lib/note-image"
-import { isNip19String, tryDecodeNip19Entity } from "@/lib/nip19-utils"
-import { getRelays, type RelaySet } from "@/lib/nostr-relays"
+import { resolvePreferredDisplayName } from "@/lib/profile-display"
 
-const HEX_EVENT_ID_REGEX = /^[0-9a-f]{64}$/i
 const CONTENT_TYPE_FILTER_SET = new Set(contentTypeFilters.map(({ type }) => type.toLowerCase()))
-
-async function fetchEventForIdentifier(
-  identifier: string,
-  relayPool?: RelayPool
-): Promise<NostrEvent | null> {
-  const trimmed = identifier?.trim()
-  if (!trimmed) return null
-
-  const fetchById = async (eventId: string, relays?: string[]) => {
-    if (relays && relays.length > 0) {
-      return (await NostrFetchService.fetchEventById(eventId, relayPool, relays)) ?? null
-    }
-    return (await NostrFetchService.fetchEventById(eventId, relayPool)) ?? null
-  }
-
-  if (HEX_EVENT_ID_REGEX.test(trimmed)) {
-    return fetchById(trimmed.toLowerCase())
-  }
-
-  if (isNip19String(trimmed)) {
-    const decoded = tryDecodeNip19Entity(trimmed)
-    if (!decoded) {
-      return fetchById(trimmed)
-    }
-
-    if (decoded.type === Prefix.Note) {
-      return fetchById(decoded.data.toLowerCase())
-    }
-
-    if (decoded.type === Prefix.Event) {
-      return fetchById(decoded.data.id.toLowerCase(), decoded.data.relays)
-    }
-
-    if (decoded.type === Prefix.Address) {
-      const { identifier: dTag, kind, pubkey, relays } = decoded.data
-      const events = relays && relays.length > 0
-        ? await NostrFetchService.fetchEventsByDTags(
-            [dTag],
-            [kind],
-            pubkey,
-            relayPool,
-            relays
-          )
-        : await NostrFetchService.fetchEventsByDTags(
-            [dTag],
-            [kind],
-            pubkey,
-            relayPool
-          )
-      return events.get(dTag) ?? null
-    }
-  }
-
-  return fetchById(trimmed)
-}
 
 export default function ContentPage() {
   const { contentLibrary, pricing } = useCopy()
@@ -94,16 +35,7 @@ export default function ContentPage() {
   const includeLessonResources = contentConfig?.contentPage?.includeLessonResources
   const includeLessonVideos = includeLessonResources?.videos ?? true
   const includeLessonDocuments = includeLessonResources?.documents ?? true
-  const imageFetchConfig = contentConfig?.contentPage?.imageFetch
-  const imageFetchRelaySet: RelaySet = imageFetchConfig?.relaySet ?? "default"
-  const maxConcurrentFetches =
-    typeof imageFetchConfig?.maxConcurrentFetches === "number" && imageFetchConfig.maxConcurrentFetches > 0
-      ? imageFetchConfig.maxConcurrentFetches
-      : 6
   const [selectedFilters, setSelectedFilters] = useState<Set<string>>(new Set(['all']))
-  const [noteImageCache, setNoteImageCache] = useState<Record<string, string>>({})
-  const attemptedNoteIds = useRef<Set<string>>(new Set())
-  const inFlightNoteIds = useRef<Set<string>>(new Set())
   
   // Fetch data from all hooks
   const { courses, isLoading: coursesLoading } = useCoursesQuery()
@@ -112,134 +44,30 @@ export default function ContentPage() {
   const { videos, isLoading: videosLoading } = useVideosQuery({ includeLessonResources: includeLessonVideos })
   const { documents, isLoading: documentsLoading } = useDocumentsQuery({ includeLessonResources: includeLessonDocuments })
   
-  // Combine loading states
   const loading = coursesLoading || videosLoading || documentsLoading
   
-  useEffect(() => {
-    const noteIdsToFetch: string[] = []
-
-    const considerNote = (
-      note?: { tags?: string[][]; content?: string } | null,
-      noteId?: string | null
-    ) => {
-      if (!noteId) return
-      const normalizedNote = note ?? undefined
-      if (getNoteImage(normalizedNote)) return
-      if (noteImageCache[noteId]) return
-      if (attemptedNoteIds.current.has(noteId)) return
-      if (inFlightNoteIds.current.has(noteId)) return
-      inFlightNoteIds.current.add(noteId)
-      noteIdsToFetch.push(noteId)
-    }
-
-    courses?.forEach(course => considerNote(course.note, course.noteId))
-    videos?.forEach(video => considerNote(video.note, video.noteId))
-    documents?.forEach(document => considerNote(document.note, document.noteId))
-
-    if (noteIdsToFetch.length === 0) {
-      return
-    }
-
-    let isCancelled = false
-
-    const fetchImages = async () => {
-      // Capture the list of noteIds we intend to fetch before the try block
-      // This ensures we can clean them up in finally even if an error occurs
-      const noteIdsToCleanup = [...noteIdsToFetch]
-      let results: Array<{ noteId: string; image?: string; hasEvent: boolean }> = []
-      let relayPoolInstance: RelayPool | null = null
-
-      try {
-        const { RelayPool: SnstrRelayPool } = await import('snstr')
-        relayPoolInstance = new SnstrRelayPool(getRelays(imageFetchRelaySet))
-
-        const worker = async (indexRef: { value: number }) => {
-          const local: Array<{ noteId: string; image?: string; hasEvent: boolean }> = []
-          while (indexRef.value < noteIdsToFetch.length) {
-            const noteId = noteIdsToFetch[indexRef.value]
-            indexRef.value += 1
-            try {
-              const event = await fetchEventForIdentifier(noteId, relayPoolInstance ?? undefined)
-              const image = getNoteImage(event ?? undefined)
-              local.push({ noteId, image, hasEvent: Boolean(event) })
-            } catch (error) {
-              console.error(`Failed to fetch note ${noteId} for image`, error)
-              local.push({ noteId, image: undefined, hasEvent: false })
-            }
-          }
-          return local
-        }
-
-        const workerCount = Math.max(
-          1,
-          Math.min(
-            noteIdsToFetch.length,
-            Number.isFinite(maxConcurrentFetches) && maxConcurrentFetches > 0 ? maxConcurrentFetches : noteIdsToFetch.length
-          )
-        )
-
-        const sharedIndex = { value: 0 }
-        const batches = await Promise.all(
-          Array.from({ length: workerCount }, () => worker(sharedIndex))
-        )
-        results = batches.flat()
-
-        if (isCancelled) return
-
-        setNoteImageCache(prev => {
-          const next = { ...prev }
-          let cacheChanged = false
-
-          results.forEach(({ noteId, image, hasEvent }) => {
-            if (hasEvent) {
-              attemptedNoteIds.current.add(noteId)
-            }
-            if (image && !next[noteId]) {
-              next[noteId] = image
-              cacheChanged = true
-            }
-          })
-
-          return cacheChanged ? next : prev
-        })
-      } catch (error) {
-        console.error('Failed to fetch note images', error)
-      } finally {
-        // Always clean up all noteIds we intended to fetch, regardless of whether
-        // results was populated or an error occurred
-        noteIdsToCleanup.forEach((noteId) => {
-          inFlightNoteIds.current.delete(noteId)
-        })
-        if (relayPoolInstance) {
-          relayPoolInstance.close()
-        }
-      }
-    }
-
-    fetchImages()
-
-    return () => {
-      isCancelled = true
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [courses, videos, documents])
-  
-  // Transform data to ContentItem format
   const contentItems = useMemo(() => {
     const allItems: ContentItem[] = []
 
-    // Add courses
     if (courses) {
       courses.forEach(course => {
+        const courseAuthor = resolvePreferredDisplayName({
+          preferredNames: [
+            course.note?.tags.find(tag => tag[0] === "instructor")?.[1],
+          ],
+          user: course.user,
+          pubkey: course.note?.pubkey || course.user?.pubkey || course.userId,
+        })
+
         const courseItem = {
           id: course.id,
           type: 'course' as const,
           title: course.note?.tags.find(tag => tag[0] === "name")?.[1] || `Course ${course.id}`,
           description: course.note?.tags.find(tag => tag[0] === "about")?.[1] || '',
           category: course.price > 0 ? pricing.premium : pricing.free,
-          image: getNoteImage(course.note) ?? (course.noteId ? noteImageCache[course.noteId] : undefined),
+          image: getNoteImage(course.note),
           tags: course.note?.tags.filter(tag => tag[0] === "t") || [],
-          instructor: course.userId,
+          instructor: courseAuthor,
           instructorPubkey: course.note?.pubkey || '',
           createdAt: course.createdAt,
           updatedAt: course.updatedAt,
@@ -257,9 +85,16 @@ export default function ContentPage() {
       })
     }
 
-    // Add videos
     if (videos) {
       videos.forEach(video => {
+        const videoAuthor = resolvePreferredDisplayName({
+          preferredNames: [
+            video.note?.tags.find(tag => tag[0] === "author")?.[1],
+          ],
+          user: video.user,
+          pubkey: video.note?.pubkey || video.user?.pubkey || video.userId,
+        })
+
         const videoItem = {
           id: video.id,
           type: 'video' as const,
@@ -270,9 +105,9 @@ export default function ContentPage() {
                       video.note?.tags.find(tag => tag[0] === "description")?.[1] ||
                       video.note?.tags.find(tag => tag[0] === "about")?.[1] || '',
           category: video.price > 0 ? pricing.premium : pricing.free,
-          image: getNoteImage(video.note, video.videoId ? `https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg` : undefined) ?? (video.noteId ? noteImageCache[video.noteId] : undefined),
+          image: getNoteImage(video.note, video.videoId ? `https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg` : undefined),
           tags: video.note?.tags.filter(tag => tag[0] === "t") || [],
-          instructor: video.userId,
+          instructor: videoAuthor,
           instructorPubkey: video.note?.pubkey || '',
           createdAt: video.createdAt,
           updatedAt: video.updatedAt,
@@ -290,9 +125,16 @@ export default function ContentPage() {
       })
     }
 
-    // Add documents
     if (documents) {
       documents.forEach(document => {
+        const documentAuthor = resolvePreferredDisplayName({
+          preferredNames: [
+            document.note?.tags.find(tag => tag[0] === "author")?.[1],
+          ],
+          user: document.user,
+          pubkey: document.note?.pubkey || document.user?.pubkey || document.userId,
+        })
+
         const documentItem = {
           id: document.id,
           type: 'document' as const,
@@ -303,9 +145,9 @@ export default function ContentPage() {
                       document.note?.tags.find(tag => tag[0] === "description")?.[1] ||
                       document.note?.tags.find(tag => tag[0] === "about")?.[1] || '',
           category: document.price > 0 ? pricing.premium : pricing.free,
-          image: getNoteImage(document.note) ?? (document.noteId ? noteImageCache[document.noteId] : undefined),
+          image: getNoteImage(document.note),
           tags: document.note?.tags.filter(tag => tag[0] === "t") || [],
-          instructor: document.userId,
+          instructor: documentAuthor,
           instructorPubkey: document.note?.pubkey || '',
           createdAt: document.createdAt,
           updatedAt: document.updatedAt,
@@ -324,7 +166,7 @@ export default function ContentPage() {
     }
 
     return allItems
-  }, [courses, videos, documents, pricing.free, pricing.premium, noteImageCache])
+  }, [courses, videos, documents, pricing.free, pricing.premium])
 
   // Extract unique tags from actual content, sorted by frequency
   const availableTags = useMemo(() => {
@@ -555,6 +397,7 @@ export default function ContentPage() {
                 variant="content"
                 onTagClick={toggleFilter}
                 showContentTypeTags={true}
+                engagementMode="off"
               />
             ))}
           </div>

@@ -9,6 +9,7 @@ import { useHomepageSectionConfig } from "@/hooks/useContentConfig";
 import { applyContentFilters } from "@/lib/content-config";
 import { tagsToAdditionalLinks } from "@/lib/additional-links";
 import { getEventATag } from "@/lib/nostr-a-tag";
+import { resolvePreferredDisplayName } from "@/lib/profile-display";
 
 /**
  * Client component for fetching and displaying video resources
@@ -122,6 +123,11 @@ export function VideosSection() {
  * Transforms Video resource data into a format compatible with ContentCard
  */
 function VideoCard({ video }: { video: VideoResourceWithNote }) {
+  const authorName = resolvePreferredDisplayName({
+    preferredNames: [video.note?.tags.find((tag) => tag[0] === "author")?.[1]],
+    user: video.user,
+    pubkey: video.note?.pubkey || video.user?.pubkey || video.userId,
+  })
   
   // Transform VideoResourceWithNote into ContentCard-compatible format
   const contentItem = {
@@ -137,8 +143,8 @@ function VideoCard({ video }: { video: VideoResourceWithNote }) {
     image: video.note?.tags.find(tag => tag[0] === "image")?.[1] || '',
     href: `/content/${video.id}`,
     tags: video.note?.tags || [],
-    author: video.userId,
-    instructor: video.userId,
+    author: authorName,
+    instructor: authorName,
     instructorPubkey: video.note?.pubkey || '',
     published: true,
     createdAt: video.createdAt,
@@ -156,5 +162,5 @@ function VideoCard({ video }: { video: VideoResourceWithNote }) {
     purchases: video.purchases,
   };
 
-  return <ContentCard item={contentItem} variant="content" showContentTypeTags={false} />;
+  return <ContentCard item={contentItem} variant="content" showContentTypeTags={false} engagementMode="off" />;
 } 

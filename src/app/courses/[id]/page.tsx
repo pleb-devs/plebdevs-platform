@@ -9,7 +9,6 @@ import {
   Play,
   Tag
 } from 'lucide-react'
-import { encodePublicKey } from 'snstr'
 
 import { MainLayout } from '@/components/layout/main-layout'
 import { CourseDetailPageSkeleton } from '@/components/ui/app-skeleton'
@@ -22,12 +21,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ExpandableText } from '@/components/ui/expandable-text'
 import { InteractionMetrics } from '@/components/ui/interaction-metrics'
 import { OptimizedImage } from '@/components/ui/optimized-image'
-import { ZapThreads } from '@/components/ui/zap-threads'
+import { DeferredZapThreads } from '@/components/ui/deferred-zap-threads'
 import { parseCourseEvent } from '@/data/types'
 import { useCourseQuery } from '@/hooks/useCoursesQuery'
 import { useInteractions } from '@/hooks/useInteractions'
 import { useLessonsQuery, type LessonWithResource } from '@/hooks/useLessonsQuery'
-import { useNostr, type NormalizedProfile } from '@/hooks/useNostr'
+import { useProfileSummary } from '@/hooks/useProfileSummary'
 import { useSession } from '@/hooks/useSession'
 import { normalizeAdditionalLinks } from '@/lib/additional-links'
 import { trackEventSafe } from '@/lib/analytics'
@@ -35,6 +34,7 @@ import { useCopy, getCopy } from '@/lib/copy'
 import { getCourseIcon } from '@/lib/copy-icons'
 import { getRelays } from '@/lib/nostr-relays'
 import { formatNoteIdentifier } from '@/lib/note-identifiers'
+import { profileSummaryFromUser, resolvePreferredDisplayName } from '@/lib/profile-display'
 import { extractRelayHintsFromDecodedData } from '@/lib/relay-hints'
 import { resolveUniversalId } from '@/lib/universal-router'
 import type { AdditionalLink } from '@/types/additional-links'
@@ -44,16 +44,6 @@ const EducationIcon = getCourseIcon('education')
 interface CoursePageProps {
   params: {
     id: string
-  }
-}
-
-function formatNpubWithEllipsis(pubkey: string): string {
-  try {
-    const npub = encodePublicKey(pubkey as `${string}1${string}`);
-    return `${npub.slice(0, 12)}...${npub.slice(-6)}`;
-  } catch {
-    // Fallback to hex format if encoding fails
-    return `${pubkey.slice(0, 6)}...${pubkey.slice(-6)}`;
   }
 }
 
@@ -160,8 +150,6 @@ function CourseLessons({
  * Course content component
  */
 function CoursePageContent({ courseId }: { courseId: string }) {
-  const { fetchProfile, normalizeKind0 } = useNostr()
-  const [instructorProfile, setInstructorProfile] = useState<NormalizedProfile | null>(null)
   const trackedCourseViewKeysRef = useRef<Set<string>>(new Set())
   const [purchaseStatusOverride, setPurchaseStatusOverride] = useState<boolean | null>(null)
   const { data: session } = useSession()
@@ -185,6 +173,27 @@ function CoursePageContent({ courseId }: { courseId: string }) {
   const { lessons: lessonsData, isLoading: lessonsLoading } = useLessonsQuery(
     resolvedCourseId || '',
     { enabled: !!resolvedCourseId }
+  )
+  const courseNote = courseData?.note
+  const parsedCourseNote = useMemo(() => {
+    if (!courseNote) return null
+
+    try {
+      return parseCourseEvent(courseNote)
+    } catch (error) {
+      console.error('Error parsing course note:', error)
+      return null
+    }
+  }, [courseNote])
+  const courseInstructorPubkey =
+    parsedCourseNote?.instructorPubkey ||
+    courseData?.user?.pubkey ||
+    courseData?.userId ||
+    courseData?.note?.pubkey ||
+    null
+  const { profile: instructorProfile } = useProfileSummary(
+    courseInstructorPubkey,
+    profileSummaryFromUser(courseData?.user)
   )
 
   const noteATag = useMemo(() => {
@@ -223,44 +232,6 @@ function CoursePageContent({ courseId }: { courseId: string }) {
   useEffect(() => {
     setPurchaseStatusOverride(null)
   }, [resolvedCourseId, sessionUserId])
-
-  // useEffect must be called unconditionally before any early returns
-  useEffect(() => {
-    if (!courseData) return
-
-    let mounted = true
-
-    const fetchInstructorProfile = async () => {
-      // Try to get instructor pubkey from multiple sources
-      let instructorPubkey = courseData.userId // From database
-
-      // If we have a Nostr note, try to get more instructor data
-      if (courseData.note) {
-        try {
-          const parsedNote = parseCourseEvent(courseData.note)
-          instructorPubkey = parsedNote.instructorPubkey || parsedNote.pubkey
-        } catch (error) {
-          console.error('Error parsing course note:', error)
-        }
-      }
-
-      // Fetch instructor profile if available
-      if (instructorPubkey) {
-        try {
-          const profileEvent = await fetchProfile(instructorPubkey)
-          if (!mounted) return
-          const normalizedProfile = normalizeKind0(profileEvent)
-          setInstructorProfile(normalizedProfile)
-        } catch (profileError) {
-          console.error('Error fetching instructor profile:', profileError)
-        }
-      }
-    }
-
-    fetchInstructorProfile()
-
-    return () => { mounted = false }
-  }, [courseData, fetchProfile, normalizeKind0])
 
   useEffect(() => {
     if (!courseData || lessonsLoading) return
@@ -320,43 +291,34 @@ function CoursePageContent({ courseId }: { courseId: string }) {
   const lessonCount = lessonsData.length
 
   // Parse data from database and Nostr note
-  let title = 'Unknown Course'
-  let description = 'No description available'
+  let title = 'Untitled course'
+  let description = ''
   let category = 'general'
   let topics: string[] = []
   let additionalLinks: AdditionalLink[] = []
   let image = '/placeholder.svg'
   let isPremium = false
   let currency = 'sats'
-  let parsedCourseNote: ReturnType<typeof parseCourseEvent> | null = null
 
-  // Start with database data (minimal Course type)
   const hasDbPrice = typeof courseData.price === 'number' && !Number.isNaN(courseData.price)
   isPremium = hasDbPrice ? (courseData.price ?? 0) > 0 : false
   const dbPrice = hasDbPrice ? courseData.price ?? 0 : null
   let nostrPrice = 0
 
-  // If we have a Nostr note, use parsed data to enhance the information
-  if (courseData.note) {
-    try {
-      const parsedNote = parseCourseEvent(courseData.note)
-      parsedCourseNote = parsedNote
-      title = parsedNote.title || title
-      description = parsedNote.description || description
-      category = parsedNote.category || category
-      topics = parsedNote.topics || topics
-      additionalLinks = normalizeAdditionalLinks(parsedNote.additionalLinks || additionalLinks)
-      image = parsedNote.image || image
-      isPremium = parsedNote.isPremium || isPremium
-      currency = parsedNote.currency || currency
-      if (parsedNote.price) {
-        const parsedPrice = Number(parsedNote.price)
-        if (Number.isFinite(parsedPrice)) {
-          nostrPrice = parsedPrice
-        }
+  if (parsedCourseNote) {
+    title = parsedCourseNote.title || title
+    description = parsedCourseNote.description || description
+    category = parsedCourseNote.category || category
+    topics = parsedCourseNote.topics || topics
+    additionalLinks = normalizeAdditionalLinks(parsedCourseNote.additionalLinks || additionalLinks)
+    image = parsedCourseNote.image || image
+    isPremium = parsedCourseNote.isPremium || isPremium
+    currency = parsedCourseNote.currency || currency
+    if (parsedCourseNote.price) {
+      const parsedPrice = Number(parsedCourseNote.price)
+      if (Number.isFinite(parsedPrice)) {
+        nostrPrice = parsedPrice
       }
-    } catch (error) {
-      console.error('Error parsing course note:', error)
     }
   }
 
@@ -383,9 +345,12 @@ function CoursePageContent({ courseId }: { courseId: string }) {
   const priceSats = priceUsed ?? 0
   isPremium = priceSats > 0
 
-  const instructor = instructorProfile?.name || 
-                     instructorProfile?.display_name || 
-                     (courseData.userId ? formatNpubWithEllipsis(courseData.userId) : 'Unknown')
+  const instructor = resolvePreferredDisplayName({
+    profile: instructorProfile,
+    preferredNames: [parsedCourseNote?.instructor],
+    user: courseData.user,
+    pubkey: courseInstructorPubkey,
+  })
   const nostrIdentifier = formatNoteIdentifier(courseData.note, courseId)
   const nostrUrl = nostrIdentifier ? `https://njump.me/${nostrIdentifier}` : null
   
@@ -667,7 +632,7 @@ function CoursePageContent({ courseId }: { courseId: string }) {
           {/* Comments Section */}
           {courseData.note && (
             <div className="mt-8" data-comments-section>
-              <ZapThreads
+              <DeferredZapThreads
                 eventDetails={{
                   identifier: parsedCourseNote?.d ?? resolvedCourseId,
                   pubkey: courseData.note.pubkey,

@@ -9,6 +9,7 @@ import { useHomepageSectionConfig } from "@/hooks/useContentConfig";
 import { applyContentFilters } from "@/lib/content-config";
 import { tagsToAdditionalLinks } from "@/lib/additional-links";
 import { getEventATag } from "@/lib/nostr-a-tag";
+import { resolvePreferredDisplayName } from "@/lib/profile-display";
 
 /**
  * Client component for fetching and displaying courses
@@ -122,8 +123,11 @@ export function CoursesSection() {
  * Transforms Course data into a format compatible with ContentCard
  */
 function CourseCard({ course }: { course: CourseWithNote }) {
-  // Transform CourseWithNote into ContentCard-compatible format
-  const instructorName = course.user?.username || course.user?.displayName || course.user?.pubkey || course.userId
+  const instructorName = resolvePreferredDisplayName({
+    preferredNames: [course.note?.tags.find((tag) => tag[0] === "instructor")?.[1]],
+    user: course.user,
+    pubkey: course.note?.pubkey || course.user?.pubkey || course.userId,
+  })
 
   const contentItem = {
     id: course.id,
@@ -153,5 +157,5 @@ function CourseCard({ course }: { course: CourseWithNote }) {
     purchases: course.purchases,
   };
 
-  return <ContentCard item={contentItem} variant="content" showContentTypeTags={false} />;
+  return <ContentCard item={contentItem} variant="content" showContentTypeTags={false} engagementMode="off" />;
 } 

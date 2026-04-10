@@ -68,7 +68,7 @@ const receiptWatchMaxMs = 90_000
 const receiptWatchBaseDelayMs = 3_000
 const receiptWatchMaxDelayMs = 7_000
 
-interface PurchaseDialogProps {
+export interface PurchaseDialogProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   priceSats: number

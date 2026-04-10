@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getRelays } from '@/lib/nostr-relays'
 import { trackEventSafe } from '@/lib/analytics'
 
-interface ZapThreadsProps {
+export interface ZapThreadsProps {
   /**
    * The anchor for the comments - can be a note, nevent, naddr, or URL
    * For content, use createNaddrAnchor helper function

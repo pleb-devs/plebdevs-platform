@@ -132,30 +132,39 @@ export function useViews(options: UseViewsOptions = {}) {
     return p
   }, [resolvedKey])
 
-  // Subscribe to shared bus and perform initial fetch
+  // Subscribe to shared bus and only fetch immediately for read-only consumers.
   useEffect(() => {
     const unsubscribe = viewsBus.subscribe(resolvedKey, (n) => setCount(n))
     const existing = viewsBus.counts.get(resolvedKey)
     if (typeof existing === "number") setCount(existing)
-    void refetchCount()
+    if (!track) {
+      void refetchCount()
+    }
     return unsubscribe
-  }, [refetchCount, resolvedKey])
+  }, [refetchCount, resolvedKey, track])
 
-  // Increment once based on dedupe policy
+  // Increment once based on dedupe policy. POST first, then fall back to GET only when needed.
   useEffect(() => {
+    if (!track) {
+      return
+    }
+
     let cancelled = false
     const maybeIncrement = async () => {
-      // If dedupe skips increment, still refresh to catch another instance's update
       if (!shouldTrackOnce()) {
         await refetchCount()
         return
       }
+
       try {
         const res = await fetch("/api/views", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ key: resolvedKey }),
         })
+        if (!res.ok) {
+          throw new Error(`POST /api/views failed: ${res.status}`)
+        }
         const json = (await res.json()) as { count?: number }
         if (!cancelled && typeof json.count === "number") {
           viewsBus.emit(resolvedKey, json.count)
@@ -171,7 +180,7 @@ export function useViews(options: UseViewsOptions = {}) {
     return () => {
       cancelled = true
     }
-  }, [refetchCount, resolvedKey, shouldTrackOnce])
+  }, [refetchCount, resolvedKey, shouldTrackOnce, track])
 
   return { key: resolvedKey, count }
 }

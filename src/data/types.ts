@@ -57,6 +57,7 @@ export interface Resource {
   videoUrl?: string       // Direct video URL for embeds
   createdAt: string       // @default(now())
   updatedAt: string       // @updatedAt
+  user?: CourseUser
   purchases?: Array<{
     id: string
     amountPaid?: number
