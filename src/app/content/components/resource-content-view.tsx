@@ -3,26 +3,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import React from 'react'
 import Link from 'next/link'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { ExpandableText } from '@/components/ui/expandable-text'
-import { MarkdownRenderer } from '@/components/ui/markdown-renderer'
-import { VideoPlayer } from '@/components/ui/video-player'
-import { OptimizedImage } from '@/components/ui/optimized-image'
-import { parseEvent } from '@/data/types'
-import { useNostr, type NormalizedProfile } from '@/hooks/useNostr'
-import { encodePublicKey, type AddressData, type EventData } from 'snstr'
-import { ZapThreads } from '@/components/ui/zap-threads'
-import { InteractionMetrics } from '@/components/ui/interaction-metrics'
-import { useCommentThreads, type CommentThreadsQueryResult } from '@/hooks/useCommentThreads'
-import { extractVideoBodyMarkdown } from '@/lib/content-utils'
-import { getRelays } from '@/lib/nostr-relays'
-import { ViewsText } from '@/components/ui/views-text'
-import { ResourceContentViewSkeleton } from '@/app/content/components/resource-skeletons'
-import { resolveUniversalId } from '@/lib/universal-router'
-import type { NostrEvent } from 'snstr'
-import { PurchaseDialog } from '@/components/purchase/purchase-dialog'
 import { useSession } from 'next-auth/react'
 import {
   ArrowLeft,
@@ -35,7 +15,29 @@ import {
   User,
   Video
 } from 'lucide-react'
+import { type AddressData, type EventData } from 'snstr'
+import type { NostrEvent } from 'snstr'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { ExpandableText } from '@/components/ui/expandable-text'
+import { MarkdownRenderer } from '@/components/ui/markdown-renderer'
+import { VideoPlayer } from '@/components/ui/video-player'
+import { OptimizedImage } from '@/components/ui/optimized-image'
+import { parseEvent, type CourseUser } from '@/data/types'
+import { useNostr, type NormalizedProfile } from '@/hooks/useNostr'
+import { DeferredZapThreads } from '@/components/ui/deferred-zap-threads'
+import { InteractionMetrics } from '@/components/ui/interaction-metrics'
+import { useCommentThreads, type CommentThreadsQueryResult } from '@/hooks/useCommentThreads'
+import { useProfileSummary } from '@/hooks/useProfileSummary'
+import { extractVideoBodyMarkdown } from '@/lib/content-utils'
+import { getRelays } from '@/lib/nostr-relays'
+import { ViewsText } from '@/components/ui/views-text'
+import { ResourceContentViewSkeleton } from '@/app/content/components/resource-skeletons'
+import { resolveUniversalId } from '@/lib/universal-router'
+import { DeferredPurchaseDialog } from '@/components/purchase/deferred-purchase-dialog'
 import { AdditionalLinksCard } from '@/components/ui/additional-links-card'
+import { profileSummaryFromUser, resolvePreferredDisplayName } from '@/lib/profile-display'
 import { extractRelayHintsFromDecodedData } from '@/lib/relay-hints'
 
 /**
@@ -62,15 +64,6 @@ function resolveVideoPlaybackUrl(
   return legacyMatch[0].replace(/[.,;)]+$/, '')
 }
 
-function formatNpubWithEllipsis(pubkey: string): string {
-  try {
-    const npub = encodePublicKey(pubkey)
-    return `${npub.slice(0, 12)}...${npub.slice(-6)}`
-  } catch {
-    return `${pubkey.slice(0, 6)}...${pubkey.slice(-6)}`
-  }
-}
-
 interface ContentMetadataProps {
   event: NostrEvent
   parsedEvent: ReturnType<typeof parseEvent>
@@ -78,6 +71,9 @@ interface ContentMetadataProps {
   serverPrice: number | null
   serverPurchased: boolean
   interactionData: CommentThreadsQueryResult
+  authorName: string
+  authorPubkey: string
+  authorProfile: NormalizedProfile | null
   relayHints?: string[]
   onUnlock?: () => void
   hidePrimaryCta?: boolean
@@ -90,42 +86,13 @@ function ContentMetadata({
   serverPrice,
   serverPurchased,
   interactionData,
+  authorName,
+  authorPubkey,
+  authorProfile,
   relayHints = [],
   onUnlock,
   hidePrimaryCta = false
 }: ContentMetadataProps) {
-  const { fetchProfile, normalizeKind0 } = useNostr()
-  const [authorProfile, setAuthorProfile] = useState<NormalizedProfile | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-
-    const fetchAuthorProfile = async () => {
-      if (!event.pubkey) {
-        return
-      }
-
-      try {
-        const profileEvent = await fetchProfile(event.pubkey)
-        if (cancelled) {
-          return
-        }
-        const normalizedProfile = normalizeKind0(profileEvent)
-        setAuthorProfile(normalizedProfile)
-      } catch (error) {
-        if (!cancelled) {
-          console.error('Error fetching author profile:', error)
-        }
-      }
-    }
-
-    fetchAuthorProfile()
-
-    return () => {
-      cancelled = true
-    }
-  }, [event.pubkey, fetchProfile, normalizeKind0])
-
   const formatDate = (timestamp: number): string => {
     return new Date(timestamp * 1000).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -179,12 +146,7 @@ function ContentMetadata({
       <div className="flex items-center flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground">
         <div className="flex items-center space-x-1">
           <User className="h-4 w-4" />
-          <span>
-            {authorProfile?.name ||
-              authorProfile?.display_name ||
-              parsedEvent.author ||
-              formatNpubWithEllipsis(event.pubkey)}
-          </span>
+          <span>{authorName}</span>
         </div>
 
         <div className="flex items-center space-x-1">
@@ -222,9 +184,9 @@ function ContentMetadata({
         hasZappedWithLightning={hasZappedWithLightning}
         viewerZapTotalSats={viewerZapTotalSats}
         zapTarget={{
-          pubkey: event.pubkey,
+          pubkey: authorPubkey,
           lightningAddress: authorProfile?.lud16 || undefined,
-          name: parsedEvent.author || undefined,
+          name: authorName || parsedEvent.author || undefined,
           relayHints
         }}
       />
@@ -249,20 +211,20 @@ function ContentMetadata({
               >
                 Purchase for {priceSats.toLocaleString()} sats
               </Button>
-              <PurchaseDialog
+              <DeferredPurchaseDialog
                 isOpen={showPurchaseDialog}
                 onOpenChange={setShowPurchaseDialog}
-                title={parsedEvent.title || "Content"}
+                title={parsedEvent.title || 'Untitled resource'}
                 priceSats={priceSats}
                 resourceId={resourceKey}
                 eventId={event.id}
                 eventKind={event.kind}
                 eventIdentifier={parsedEvent.d}
-                eventPubkey={event.pubkey}
+                eventPubkey={authorPubkey}
                 zapTarget={{
-                  pubkey: event.pubkey,
+                  pubkey: authorPubkey,
                   lightningAddress: authorProfile?.lud16 || undefined,
-                  name: parsedEvent.author || undefined,
+                  name: authorName || parsedEvent.author || undefined,
                   relayHints
                 }}
                 viewerZapTotalSats={viewerZapTotalSats}
@@ -300,6 +262,9 @@ interface ResourceMetadataHeroProps {
   unlockedViaCourse?: boolean
   unlockingCourseId?: string | null
   interactionData: CommentThreadsQueryResult
+  authorName: string
+  authorPubkey: string
+  authorProfile: NormalizedProfile | null
   relayHints?: string[]
   onUnlock?: () => void
   showBackLink?: boolean
@@ -319,6 +284,9 @@ export function ResourceMetadataHero({
   unlockedViaCourse = false,
   unlockingCourseId = null,
   interactionData,
+  authorName,
+  authorPubkey,
+  authorProfile,
   relayHints = [],
   onUnlock,
   showBackLink,
@@ -388,7 +356,7 @@ export function ResourceMetadataHero({
 
         <div className="space-y-3">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">
-            {parsedEvent.title || 'Unknown Resource'}
+            {parsedEvent.title || 'Untitled resource'}
           </h1>
           {rawSummary && (
             <ExpandableText
@@ -406,6 +374,9 @@ export function ResourceMetadataHero({
             serverPrice={serverPrice}
             serverPurchased={serverPurchased}
             interactionData={interactionData}
+            authorName={authorName}
+            authorPubkey={authorPubkey}
+            authorProfile={authorProfile}
             relayHints={relayHints}
             onUnlock={onUnlock}
             hidePrimaryCta={hidePrimaryCta}
@@ -424,6 +395,7 @@ export function ResourceMetadataHero({
 export interface ResourceContentViewProps {
   resourceId: string
   initialEvent?: NostrEvent | null
+  initialProfileSummary?: NormalizedProfile | null
   showBackLink?: boolean
   backHref?: string
   showHero?: boolean
@@ -438,13 +410,14 @@ export interface ResourceContentViewProps {
 export function ResourceContentView({
   resourceId,
   initialEvent,
+  initialProfileSummary = null,
   showBackLink = false,
   backHref = `/content/${resourceId}`,
   showHero = true,
   showAdditionalLinks = true,
   onMissingResource
 }: ResourceContentViewProps) {
-  const { fetchSingleEvent, fetchProfile, normalizeKind0 } = useNostr()
+  const { fetchSingleEvent } = useNostr()
   const { status: sessionStatus } = useSession()
   const [event, setEvent] = useState<NostrEvent | null>(initialEvent ?? null)
   const [loading, setLoading] = useState(!initialEvent)
@@ -454,12 +427,25 @@ export function ResourceContentView({
   const [unlockedViaCourse, setUnlockedViaCourse] = useState<boolean>(false)
   const [unlockingCourseId, setUnlockingCourseId] = useState<string | null>(null)
   const [showPurchaseDialog, setShowPurchaseDialog] = useState(false)
-  const [authorProfile, setAuthorProfile] = useState<NormalizedProfile | null>(null)
+  const [resourceUser, setResourceUser] = useState<CourseUser | null>(null)
   const resolvedIdentifier = useMemo(() => resolveUniversalId(resourceId), [resourceId])
   const routeRelayHints = useMemo(
     () => extractRelayHintsFromDecodedData(resolvedIdentifier?.decodedData),
     [resolvedIdentifier?.decodedData]
   )
+  const parsedEventData = useMemo(() => (event ? parseEvent(event) : null), [event])
+  const resolvedAuthorPubkey =
+    parsedEventData?.authorPubkey ||
+    resourceUser?.pubkey ||
+    event?.pubkey ||
+    null
+  const seededAuthorProfile = useMemo(
+    () => initialProfileSummary ?? profileSummaryFromUser(resourceUser),
+    [initialProfileSummary, resourceUser]
+  )
+  const { profile: authorProfile } = useProfileSummary(resolvedAuthorPubkey, seededAuthorProfile, {
+    enabled: Boolean(resolvedAuthorPubkey),
+  })
   const interactionData = useCommentThreads(event?.id, {
     enabled: Boolean(event?.id),
     realtime: true,
@@ -555,55 +541,43 @@ export function ResourceContentView({
       cancelled = true
     }
   }, [resourceId, fetchSingleEvent, initialEvent, resolvedIdentifier])
-
-  useEffect(() => {
-    let cancelled = false
-
-    const fetchAuthorProfile = async () => {
-      if (!event?.pubkey) {
-        return
-      }
-
-      try {
-        const profileEvent = await fetchProfile(event.pubkey)
-        if (cancelled) {
-          return
-        }
-        const normalizedProfile = normalizeKind0(profileEvent)
-        setAuthorProfile(normalizedProfile)
-      } catch (error) {
-        if (!cancelled) {
-          console.error('Error fetching author profile:', error)
-        }
-      }
-    }
-
-    if (event?.pubkey) {
-      fetchAuthorProfile()
-    }
-
-    return () => {
-      cancelled = true
-    }
-  }, [event?.pubkey, fetchProfile, normalizeKind0])
-
   useEffect(() => {
     const controller = new AbortController()
 
     const fetchResourceMeta = async () => {
+      const resetResourceMeta = () => {
+        if (controller.signal.aborted) return
+        setResourceUser(null)
+        setServerPrice(null)
+        setServerPurchased(false)
+        setUnlockedViaCourse(false)
+        setUnlockingCourseId(null)
+      }
+
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-      if (!uuidRegex.test(resourceId)) return
+      if (!uuidRegex.test(resourceId)) {
+        resetResourceMeta()
+        return
+      }
+
+      resetResourceMeta()
       try {
         const res = await fetch(`/api/resources/${resourceId}`, {
           signal: controller.signal,
           credentials: 'include',
         })
-        if (!res.ok || controller.signal.aborted) return
+        if (!res.ok || controller.signal.aborted) {
+          resetResourceMeta()
+          return
+        }
 
         const body = await res.json()
         if (controller.signal.aborted) return
 
         const data = body?.data
+        if (!controller.signal.aborted) {
+          setResourceUser(data?.user ?? null)
+        }
         if (!controller.signal.aborted && typeof data?.price === 'number') {
           setServerPrice(data.price)
         }
@@ -635,6 +609,7 @@ export function ResourceContentView({
         if ((err as any)?.name === 'AbortError' || controller.signal.aborted) {
           return
         }
+        resetResourceMeta()
         console.error('Failed to fetch resource meta', err)
       }
     }
@@ -687,10 +662,23 @@ export function ResourceContentView({
     )
   }
 
-  const parsedEvent = parseEvent(event)
-  const title = parsedEvent.title || 'Unknown Resource'
+  const parsedEvent = parsedEventData
+  if (!parsedEvent) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">Content not available</p>
+      </div>
+    )
+  }
+  const title = parsedEvent.title || 'Untitled resource'
   const type = parsedEvent.type || 'document'
   const additionalLinks = parsedEvent.additionalLinks || []
+  const authorName = resolvePreferredDisplayName({
+    profile: authorProfile,
+    preferredNames: [parsedEvent.author],
+    user: resourceUser,
+    pubkey: resolvedAuthorPubkey,
+  })
   // Check parsedEvent.isPremium (boolean) and also check raw event tags for string 'true'
   const isPremiumFromParsed = parsedEvent.isPremium === true
   const isPremiumFromTags = event.tags?.some(
@@ -738,6 +726,9 @@ export function ResourceContentView({
           unlockedViaCourse={unlockedViaCourse}
           unlockingCourseId={unlockingCourseId}
           interactionData={interactionData}
+          authorName={authorName}
+          authorPubkey={resolvedAuthorPubkey || event.pubkey}
+          authorProfile={authorProfile}
           relayHints={routeRelayHints}
           onUnlock={handleUnlock}
           showBackLink={showBackLink}
@@ -767,20 +758,20 @@ export function ResourceContentView({
               </CardContent>
             </Card>
             {/* Render a dialog scoped to this CTA so clicking the button opens it */}
-            <PurchaseDialog
+            <DeferredPurchaseDialog
               isOpen={showPurchaseDialog}
               onOpenChange={setShowPurchaseDialog}
-              title={parsedEvent.title || "Content"}
+              title={title}
               priceSats={priceSats}
               resourceId={resourceId}
               eventId={event.id}
               eventKind={event.kind}
               eventIdentifier={parsedEvent.d}
-              eventPubkey={event.pubkey}
+              eventPubkey={resolvedAuthorPubkey || event.pubkey}
               zapTarget={{
-                pubkey: event.pubkey,
+                pubkey: resolvedAuthorPubkey || event.pubkey,
                 lightningAddress: authorProfile?.lud16 || undefined,
-                name: parsedEvent.author || undefined,
+                name: authorName || parsedEvent.author || undefined,
                 relayHints: routeRelayHints
               }}
               viewerZapTotalSats={viewerZapTotalSats}
@@ -829,9 +820,9 @@ export function ResourceContentView({
       )}
 
       <div data-comments-section>
-        <ZapThreads
+        <DeferredZapThreads
           eventDetails={{
-            identifier: resolvedIdentifier?.resolvedId ?? resourceId,
+            identifier: parsedEvent.d || resolvedIdentifier?.resolvedId || resourceId,
             pubkey: event.pubkey,
             kind: event.kind,
             relays: getRelays('default')

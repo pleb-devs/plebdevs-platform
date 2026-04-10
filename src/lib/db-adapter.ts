@@ -44,6 +44,7 @@ function transformResource(resource: any): Resource {
     videoUrl: resource.videoUrl ?? undefined,
     createdAt: resource.createdAt.toISOString(),
     updatedAt: resource.updatedAt.toISOString(),
+    user: transformUser(resource.user),
     purchases: Array.isArray(resource.purchases) ? resource.purchases.map((p: any) => ({
       ...p,
       createdAt: p.createdAt?.toISOString?.() ?? p.createdAt,
@@ -606,9 +607,10 @@ export class ResourceAdapter {
 
     const resources = await prisma.resource.findMany({
       orderBy: { createdAt: 'desc' },
-      include: options?.userId
-        ? { purchases: { where: { userId: options.userId } } }
-        : undefined,
+      include: {
+        user: { select: courseUserSelect },
+        ...(options?.userId ? { purchases: { where: { userId: options.userId } } } : {}),
+      },
       ...(where ? { where } : {})
     })
     return resources.map(transformResource)
@@ -643,9 +645,10 @@ export class ResourceAdapter {
       skip,
       take: pageSize,
       orderBy: { createdAt: 'desc' },
-      include: options?.userId
-        ? { purchases: { where: { userId: options.userId } } }
-        : undefined,
+      include: {
+        user: { select: courseUserSelect },
+        ...(options?.userId ? { purchases: { where: { userId: options.userId } } } : {}),
+      },
       ...(where ? { where } : {})
     }
 
@@ -676,7 +679,10 @@ export class ResourceAdapter {
   static async findById(id: string, userId?: string): Promise<Resource | null> {
     const resource = await prisma.resource.findUnique({
       where: { id },
-      include: userId ? { purchases: { where: { userId } } } : undefined
+      include: {
+        user: { select: courseUserSelect },
+        ...(userId ? { purchases: { where: { userId } } } : {}),
+      },
     })
     return resource ? transformResource(resource) : null
   }
@@ -684,7 +690,10 @@ export class ResourceAdapter {
   static async findByIdWithNote(id: string, userId?: string): Promise<ResourceWithNote | null> {
     const resource = await prisma.resource.findUnique({
       where: { id },
-      include: userId ? { purchases: { where: { userId } } } : undefined
+      include: {
+        user: { select: courseUserSelect },
+        ...(userId ? { purchases: { where: { userId } } } : {}),
+      },
     })
     
     if (!resource) return null
@@ -699,7 +708,11 @@ export class ResourceAdapter {
   }
 
   static async create(resourceData: Omit<Resource, 'id'>): Promise<Resource> {
-    const { purchases: _purchases, ...resourceDataWithoutPurchases } = resourceData
+    const {
+      purchases: _purchases,
+      user: _user,
+      ...resourceDataWithoutPurchases
+    } = resourceData
     const resource = await prisma.resource.create({
       data: {
         ...resourceDataWithoutPurchases,
@@ -713,7 +726,13 @@ export class ResourceAdapter {
 
   static async update(id: string, updates: Partial<Resource>): Promise<Resource | null> {
     try {
-      const { purchases: _purchases, id: _id, userId: _userId, ...safeUpdates } = updates
+      const {
+        purchases: _purchases,
+        id: _id,
+        userId: _userId,
+        user: _user,
+        ...safeUpdates
+      } = updates
       const resource = await prisma.resource.update({
         where: { id },
         data: {
@@ -741,21 +760,30 @@ export class ResourceAdapter {
   static async findByUserId(userId: string): Promise<Resource[]> {
     const resources = await prisma.resource.findMany({
       where: { userId },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: { select: courseUserSelect },
+      },
     })
     return resources.map(transformResource)
   }
 
   static async findByNoteId(noteId: string): Promise<Resource | null> {
     const resource = await prisma.resource.findUnique({
-      where: { noteId }
+      where: { noteId },
+      include: {
+        user: { select: courseUserSelect },
+      },
     })
     return resource ? transformResource(resource) : null
   }
 
   static async findByVideoId(videoId: string): Promise<Resource | null> {
     const resource = await prisma.resource.findFirst({
-      where: { videoId }
+      where: { videoId },
+      include: {
+        user: { select: courseUserSelect },
+      },
     })
     return resource ? transformResource(resource) : null
   }
@@ -763,7 +791,10 @@ export class ResourceAdapter {
   static async findFree(): Promise<Resource[]> {
     const resources = await prisma.resource.findMany({
       where: { price: 0 },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: { select: courseUserSelect },
+      },
     })
     return resources.map(transformResource)
   }
@@ -771,7 +802,10 @@ export class ResourceAdapter {
   static async findPaid(): Promise<Resource[]> {
     const resources = await prisma.resource.findMany({
       where: { price: { gt: 0 } },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: { select: courseUserSelect },
+      },
     })
     return resources.map(transformResource)
   }
@@ -824,7 +858,13 @@ export class LessonAdapter {
   static async findByCourseIdWithResources(courseId: string): Promise<(Lesson & { resource?: Resource })[]> {
     const lessons = await prisma.lesson.findMany({
       where: { courseId },
-      include: { resource: true },
+      include: {
+        resource: {
+          include: {
+            user: { select: courseUserSelect },
+          },
+        },
+      },
       orderBy: { index: 'asc' }
     })
     return lessons.map(lesson => ({

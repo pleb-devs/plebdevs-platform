@@ -22,10 +22,6 @@ export interface LessonWithResource extends Lesson {
   resource?: ResourceWithNote
 }
 
-export interface CourseWithLessons extends CourseWithNote {
-  lessons: LessonWithResource[]
-}
-
 export interface ResourceWithNote extends Resource {
   note?: NostrEvent
   noteError?: string
@@ -53,7 +49,7 @@ export interface CoursesQueryResult {
 }
 
 export interface CourseQueryResult {
-  course: CourseWithLessons | null
+  course: CourseWithNote | null
   isLoading: boolean
   isError: boolean
   error: Error | null
@@ -344,11 +340,11 @@ export async function fetchCoursesWithNotes(
 }
 
 /**
- * Fetch a single course with its lessons and Nostr note
+ * Fetch a single course's metadata and Nostr note.
  */
-export async function fetchCourseWithLessons(courseId: string, relayPool: RelayPool, relays: string[]): Promise<CourseWithLessons | null> {
-  // Fetch course with lessons from API
-  const response = await fetch(`/api/courses/${courseId}`)
+export async function fetchCourseMetadata(courseId: string, relayPool: RelayPool, relays: string[]): Promise<CourseWithNote | null> {
+  // Fetch course metadata only; lesson structure is loaded separately via useLessonsQuery.
+  const response = await fetch(`/api/courses/${courseId}?includeLessons=false`)
   if (!response.ok) {
     return null
   }
@@ -360,84 +356,34 @@ export async function fetchCourseWithLessons(courseId: string, relayPool: RelayP
   }
 
   const courseWithNote = data
-  const lessons = data.lessons || []
+  let courseNote: NostrEvent | undefined = courseWithNote.note
+  let noteError: string | undefined
 
-  // Extract resources from lessons
-  const resources = lessons
-    .filter((lesson: any) => lesson.resource)
-    .map((lesson: any) => lesson.resource)
-
-  // Create a map of resources by ID for quick lookup
-  const resourcesMap = new Map<string, ResourceWithNote>()
-  resources.forEach((resource: ResourceWithNote) => resourcesMap.set(resource.id, resource))
-
-  // Extract resource IDs
-  const resourceIds = resources.map((r: any) => r.id)
-
-  // Collect all IDs that need Nostr notes fetched (course ID + resource IDs)
-  const idsToFetch = [courseId, ...resourceIds]
-
-  // Fetch notes by 'd' tag in one batch query
-  if (idsToFetch.length > 0) {
+  if (!courseNote) {
     try {
-      logger.debug('Fetching course + lesson notes from Nostr', { count: idsToFetch.length })
-      
+      logger.debug("Fetching course note from Nostr", { courseId })
       const notes = await relayPool.querySync(
         relays,
-        { "#d": idsToFetch, kinds: [30004, 30023, 30402] }, // Course lists and content events
-        { timeout: 5000 } // Reduced timeout for faster failures
+        { "#d": [courseId], kinds: [30004, 30023, 30402] },
+        { timeout: 5000 }
       )
-      
-      logger.debug('Fetched course + lesson notes from Nostr', { count: notes.length })
-      
-      const notesMap = new Map<string, NostrEvent>()
-      notes.forEach(note => {
-        const dTag = note.tags.find(tag => tag[0] === 'd')
-        if (dTag && dTag[1]) {
-          notesMap.set(dTag[1], note)
-        }
-      })
-      
-      // Update course note if found
-      if (notesMap.has(courseId)) {
-        courseWithNote.note = notesMap.get(courseId)
-      }
-      
-      // Update resource notes if found
-      resources.forEach((resource: ResourceWithNote) => {
-        if (notesMap.has(resource.id)) {
-          resource.note = notesMap.get(resource.id)
-          resourcesMap.set(resource.id, resource)
-        }
-      })
+
+      courseNote = notes.find((note) => note.tags.some((tag) => tag[0] === "d" && tag[1] === courseId))
     } catch (error) {
-      console.error('Failed to fetch notes for course and lessons:', error)
-      if (courseWithNote.noteId && !courseWithNote.note) {
-        courseWithNote.noteError = error instanceof Error ? error.message : 'Failed to fetch note'
-      }
-      resources.forEach((resource: ResourceWithNote) => {
-        if (resource.noteId && !resource.note) {
-          resource.noteError = error instanceof Error ? error.message : 'Failed to fetch note'
-          resourcesMap.set(resource.id, resource)
-        }
-      })
+      console.error("Failed to fetch course note from real Nostr:", error)
+      noteError = error instanceof Error ? error.message : "Failed to fetch note"
     }
   }
 
-  // Create lessons with their associated resources
-  const lessonsWithResources: LessonWithResource[] = lessons.map((lesson: any) => ({
-    ...lesson,
-    resource: lesson.resourceId ? resourcesMap.get(lesson.resourceId) : undefined
-  }))
-
   return {
     ...courseWithNote,
-    lessons: lessonsWithResources.sort((a, b) => a.index - b.index)
+    note: courseNote,
+    noteError: courseNote ? undefined : noteError,
   }
 }
 
 /**
- * Hook for fetching a single course with its lessons and Nostr note
+ * Hook for fetching a single course's metadata and Nostr note.
  */
 export function useCourseQuery(courseId: string, options: UseCourseQueryOptions = {}): CourseQueryResult {
   const { relayPool, relays } = useSnstrContext()
@@ -456,7 +402,7 @@ export function useCourseQuery(courseId: string, options: UseCourseQueryOptions 
 
   const query = useQuery({
     queryKey: coursesQueryKeys.detailForViewer(courseId, viewerKey),
-    queryFn: () => fetchCourseWithLessons(courseId, relayPool, relays),
+    queryFn: () => fetchCourseMetadata(courseId, relayPool, relays),
     enabled: enabled && !!courseId,
     staleTime,
     gcTime,

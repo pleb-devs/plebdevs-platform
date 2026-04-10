@@ -1,5 +1,6 @@
 "use client";
 
+import { createCourseDisplay, parseCourseEvent } from "@/data/types";
 import { useCoursesQuery, CourseWithNote } from "@/hooks/useCoursesQuery";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { ContentCard } from "@/components/ui/content-card";
@@ -9,6 +10,7 @@ import { useHomepageSectionConfig } from "@/hooks/useContentConfig";
 import { applyContentFilters } from "@/lib/content-config";
 import { tagsToAdditionalLinks } from "@/lib/additional-links";
 import { getEventATag } from "@/lib/nostr-a-tag";
+import { resolvePreferredDisplayName } from "@/lib/profile-display";
 
 /**
  * Client component for fetching and displaying courses
@@ -122,21 +124,28 @@ export function CoursesSection() {
  * Transforms Course data into a format compatible with ContentCard
  */
 function CourseCard({ course }: { course: CourseWithNote }) {
-  // Transform CourseWithNote into ContentCard-compatible format
-  const instructorName = course.user?.username || course.user?.displayName || course.user?.pubkey || course.userId
+  const parsedCourse = course.note ? parseCourseEvent(course.note) : null
+  const display = parsedCourse
+    ? createCourseDisplay(course, parsedCourse)
+    : null
+  const instructorName = resolvePreferredDisplayName({
+    preferredNames: [display?.instructor],
+    user: course.user,
+    pubkey: display?.instructorPubkey || course.note?.pubkey || course.user?.pubkey || course.userId,
+  })
 
   const contentItem = {
     id: course.id,
     type: 'course' as const,
-    title: course.note?.tags.find(tag => tag[0] === "name")?.[1] || `Course ${course.id}`,
-    description: course.note?.tags.find(tag => tag[0] === "about")?.[1] || '',
+    title: display?.title || `Course ${course.id}`,
+    description: display?.description || '',
     category: course.price > 0 ? 'Premium' : 'Free',
-    image: course.note?.tags.find(tag => tag[0] === "image")?.[1] || '',
+    image: display?.image || '',
     href: `/courses/${course.id}`,
-    tags: course.note?.tags || [],
+    tags: display?.tags || course.note?.tags || [],
     author: instructorName,
     instructor: instructorName,
-    instructorPubkey: course.note?.pubkey || '',
+    instructorPubkey: display?.instructorPubkey || course.note?.pubkey || course.user?.pubkey || course.userId || '',
     published: true,
     createdAt: course.createdAt,
     updatedAt: course.updatedAt,
@@ -146,12 +155,12 @@ function CourseCard({ course }: { course: CourseWithNote }) {
     rating: 4.5,
     studentsCount: 0,
     featured: false,
-    topics: course.note?.tags.filter(tag => tag[0] === "t").map(tag => tag[1]) || [],
-    additionalLinks: tagsToAdditionalLinks(course.note?.tags, 'l'),
+    topics: display?.topics || [],
+    additionalLinks: display?.additionalLinks ?? tagsToAdditionalLinks(course.note?.tags, 'r'),
     noteId: course.note?.id || course.noteId,
     noteATag: getEventATag(course.note),
     purchases: course.purchases,
   };
 
-  return <ContentCard item={contentItem} variant="content" showContentTypeTags={false} />;
+  return <ContentCard item={contentItem} variant="content" showContentTypeTags={false} engagementMode="off" />;
 } 

@@ -1,5 +1,6 @@
 "use client";
 
+import { createResourceDisplay, parseEvent } from "@/data/types";
 import { useDocumentsQuery, DocumentResourceWithNote } from "@/hooks/useDocumentsQuery";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { ContentCard } from "@/components/ui/content-card";
@@ -9,6 +10,7 @@ import { useHomepageSectionConfig } from "@/hooks/useContentConfig";
 import { applyContentFilters } from "@/lib/content-config";
 import { tagsToAdditionalLinks } from "@/lib/additional-links";
 import { getEventATag } from "@/lib/nostr-a-tag";
+import { resolvePreferredDisplayName } from "@/lib/profile-display";
 
 /**
  * Client component for fetching and displaying document resources
@@ -122,6 +124,15 @@ export function DocumentsSection() {
  * Transforms Document resource data into a format compatible with ContentCard
  */
 function DocumentCard({ document }: { document: DocumentResourceWithNote }) {
+  const parsedDocument = document.note ? parseEvent(document.note) : null
+  const display = parsedDocument
+    ? createResourceDisplay(document, parsedDocument)
+    : null
+  const authorName = resolvePreferredDisplayName({
+    preferredNames: [display?.instructor],
+    user: document.user,
+    pubkey: display?.instructorPubkey || parsedDocument?.pubkey || document.user?.pubkey || document.userId,
+  })
   
   // Transform DocumentResourceWithNote into ContentCard-compatible format
   const contentItem = {
@@ -137,8 +148,8 @@ function DocumentCard({ document }: { document: DocumentResourceWithNote }) {
     image: document.note?.tags.find(tag => tag[0] === "image")?.[1] || '',
     href: `/content/${document.id}`,
     tags: document.note?.tags || [],
-    author: document.userId,
-    instructor: document.userId,
+    author: authorName,
+    instructor: authorName,
     instructorPubkey: document.note?.pubkey || '',
     published: true,
     createdAt: document.createdAt,
@@ -156,5 +167,5 @@ function DocumentCard({ document }: { document: DocumentResourceWithNote }) {
     purchases: document.purchases,
   };
 
-  return <ContentCard item={contentItem} variant="content" showContentTypeTags={false} />;
+  return <ContentCard item={contentItem} variant="content" showContentTypeTags={false} engagementMode="off" />;
 } 

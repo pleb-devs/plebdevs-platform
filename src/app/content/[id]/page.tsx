@@ -13,11 +13,11 @@ import {
   Video
 } from 'lucide-react'
 import { useSession } from 'next-auth/react'
-import { encodePublicKey, type AddressData, type EventData, type NostrEvent } from 'snstr'
+import { type AddressData, type EventData, type NostrEvent } from 'snstr'
 
 import { MainLayout } from '@/components/layout/main-layout'
 import { Section } from '@/components/layout/section'
-import { PurchaseDialog } from '@/components/purchase/purchase-dialog'
+import { DeferredPurchaseDialog } from '@/components/purchase/deferred-purchase-dialog'
 import { AdditionalLinksCard } from '@/components/ui/additional-links-card'
 import { Badge } from '@/components/ui/badge'
 import { SidebarToggle } from '@/components/ui/sidebar-toggle'
@@ -27,16 +27,18 @@ import { ExpandableText } from '@/components/ui/expandable-text'
 import { InteractionMetrics } from '@/components/ui/interaction-metrics'
 import { OptimizedImage } from '@/components/ui/optimized-image'
 import { ViewsText } from '@/components/ui/views-text'
-import { ZapThreads } from '@/components/ui/zap-threads'
+import { DeferredZapThreads } from '@/components/ui/deferred-zap-threads'
 import { ResourceContentView } from '@/app/content/components/resource-content-view'
 import { ResourcePageSkeleton, ResourceOverviewCardSkeleton } from '@/app/content/components/resource-skeletons'
-import { parseEvent } from '@/data/types'
+import { parseEvent, type CourseUser } from '@/data/types'
 import { useInteractions } from '@/hooks/useInteractions'
-import { useNostr, type NormalizedProfile } from '@/hooks/useNostr'
+import { useNostr } from '@/hooks/useNostr'
+import { useProfileSummary } from '@/hooks/useProfileSummary'
 import { trackEventSafe } from '@/lib/analytics'
 import { extractNoteId } from '@/lib/nostr-events'
 import { formatNoteIdentifier } from '@/lib/note-identifiers'
 import { getRelays } from '@/lib/nostr-relays'
+import { profileSummaryFromUser, resolvePreferredDisplayName } from '@/lib/profile-display'
 import { extractRelayHintsFromDecodedData } from '@/lib/relay-hints'
 import { resolveUniversalId, type UniversalIdResult } from '@/lib/universal-router'
 
@@ -44,16 +46,6 @@ interface ResourcePageProps {
   params: Promise<{
     id: string
   }>
-}
-
-function formatNpubWithEllipsis(pubkey: string): string {
-  try {
-    const npub = encodePublicKey(pubkey as `${string}1${string}`);
-    return `${npub.slice(0, 12)}...${npub.slice(-6)}`;
-  } catch {
-    // Fallback to hex format if encoding fails
-    return `${pubkey.slice(0, 6)}...${pubkey.slice(-6)}`;
-  }
 }
 
 /**
@@ -111,10 +103,10 @@ function ResourceOverview({ resourceId, contentHref }: { resourceId: string; con
  * Main resource page component
  */
 function ResourcePageContent({ resourceId }: { resourceId: string }) {
-  const { fetchSingleEvent, fetchProfile, normalizeKind0 } = useNostr()
+  const { fetchSingleEvent } = useNostr()
   const { status: sessionStatus } = useSession()
   const [event, setEvent] = useState<NostrEvent | null>(null)
-  const [authorProfile, setAuthorProfile] = useState<NormalizedProfile | null>(null)
+  const [resourceUser, setResourceUser] = useState<CourseUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [idResult, setIdResult] = useState<UniversalIdResult | null>(null)
@@ -157,6 +149,13 @@ function ResourcePageContent({ resourceId }: { resourceId: string }) {
     () => extractRelayHintsFromDecodedData(idResult?.decodedData),
     [idResult?.decodedData]
   )
+  const initialAuthorProfile = useMemo(
+    () => profileSummaryFromUser(resourceUser),
+    [resourceUser]
+  )
+  const { profile: authorProfile } = useProfileSummary(event?.pubkey, initialAuthorProfile, {
+    enabled: Boolean(event?.pubkey),
+  })
   
   // Get real interaction data from Nostr - call hook unconditionally at top level
   const {
@@ -258,15 +257,6 @@ function ResourcePageContent({ resourceId }: { resourceId: string }) {
         
         if (nostrEvent) {
           setEvent(nostrEvent)
-          
-          // Fetch author profile
-          try {
-            const profileEvent = await fetchProfile(nostrEvent.pubkey)
-            const normalizedProfile = normalizeKind0(profileEvent)
-            setAuthorProfile(normalizedProfile)
-          } catch (profileError) {
-            console.error('Error fetching author profile:', profileError)
-          }
         } else {
           setError('Resource not found')
         }
@@ -281,28 +271,48 @@ function ResourcePageContent({ resourceId }: { resourceId: string }) {
     if (resourceId) {
       fetchEvent()
     }
-  }, [resourceId, fetchSingleEvent, fetchProfile, normalizeKind0])
+  }, [resourceId, fetchSingleEvent])
 
   useEffect(() => {
     let isCancelled = false
 
     const fetchResourceMeta = async () => {
+      const resetResourceMeta = () => {
+        if (isCancelled) return
+        setResourceUser(null)
+        setServerPrice(null)
+        setServerPurchased(false)
+        setUnlockedViaCourse(false)
+        setUnlockingCourseId(null)
+      }
+
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
       if (!uuidRegex.test(resourceId)) {
+        resetResourceMeta()
         setIsPurchaseStatusLoading(false)
         return
       }
 
-      if (sessionStatus === 'loading') return
+      if (sessionStatus === 'loading') {
+        resetResourceMeta()
+        return
+      }
 
+      resetResourceMeta()
       setIsPurchaseStatusLoading(true)
       try {
         const res = await fetch(`/api/resources/${resourceId}`, {
           credentials: 'include',
         })
-        if (!res.ok) return
+        if (!res.ok) {
+          resetResourceMeta()
+          return
+        }
         const body = await res.json()
         const data = body?.data
+        if (!isCancelled) {
+          setResourceUser(data?.user ?? null)
+        }
         if (typeof data?.price === 'number' && !isCancelled) {
           setServerPrice(data.price)
         }
@@ -322,6 +332,7 @@ function ResourcePageContent({ resourceId }: { resourceId: string }) {
           setUnlockingCourseId(data?.unlockingCourseId || null)
         }
       } catch (err) {
+        resetResourceMeta()
         console.error('Failed to fetch resource meta', err)
       } finally {
         if (!isCancelled) {
@@ -337,7 +348,7 @@ function ResourcePageContent({ resourceId }: { resourceId: string }) {
       // (e.g., during fast navigation between resources).
       isCancelled = true
     }
-  }, [resourceId, sessionStatus, viewerZapTotalSats, viewerZapReceipts?.length])
+  }, [resourceId, sessionStatus])
 
   useEffect(() => {
     if (!event) return
@@ -368,15 +379,17 @@ function ResourcePageContent({ resourceId }: { resourceId: string }) {
   }
 
   const parsedEvent = parseEvent(event)
-  const title = parsedEvent.title || 'Unknown Resource'
-  const description = parsedEvent.summary || 'No description available'
+  const title = parsedEvent.title || 'Untitled resource'
+  const description = parsedEvent.summary || ''
   const topics = parsedEvent.topics || []
   const additionalLinks = parsedEvent.additionalLinks || []
   const image = parsedEvent.image || '/placeholder.svg'
-  const author = authorProfile?.name || 
-                 authorProfile?.display_name || 
-                 parsedEvent.author || 
-                 formatNpubWithEllipsis(event.pubkey)
+  const author = resolvePreferredDisplayName({
+    profile: authorProfile,
+    preferredNames: [parsedEvent.author],
+    user: resourceUser,
+    pubkey: event.pubkey,
+  })
   const type = parsedEvent.type || 'document'
   // Views are tracked via /api/views and Vercel KV
   const isCourseContent = idResult?.contentType === 'course' || event.kind === 30004
@@ -493,10 +506,12 @@ function ResourcePageContent({ resourceId }: { resourceId: string }) {
                   </Badge>
                 </div>
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">{title}</h1>
-                <ExpandableText
-                  text={description}
-                  textClassName="text-lg text-muted-foreground"
-                />
+                {description && (
+                  <ExpandableText
+                    text={description}
+                    textClassName="text-lg text-muted-foreground"
+                  />
+                )}
               </div>
 
               <div className="flex items-center flex-wrap gap-4 sm:gap-6">
@@ -584,17 +599,17 @@ function ResourcePageContent({ resourceId }: { resourceId: string }) {
                         </Badge>
                       )}
                     </>
+                  )}
+                </div>
               )}
-            </div>
-          )}
 
-          {requiresPreviewGate && serverPurchased && courseAccessCta}
+              {requiresPreviewGate && serverPurchased && courseAccessCta}
 
-          {canPurchase && (
-            <PurchaseDialog
-              isOpen={showPurchaseDialog}
-              onOpenChange={handlePurchaseDialogChange}
-              title={title}
+              {canPurchase && (
+                <DeferredPurchaseDialog
+                  isOpen={showPurchaseDialog}
+                  onOpenChange={handlePurchaseDialogChange}
+                  title={title}
                   priceSats={priceSats}
                   resourceId={resourceId}
                   eventId={event.id}
@@ -700,6 +715,7 @@ function ResourcePageContent({ resourceId }: { resourceId: string }) {
                 <ResourceContentView 
                   resourceId={resourceId} 
                   initialEvent={event} 
+                  initialProfileSummary={authorProfile ?? initialAuthorProfile}
                   showBackLink={false}
                   showHero={false}
                   showAdditionalLinks={false}
@@ -774,7 +790,7 @@ function ResourcePageContent({ resourceId }: { resourceId: string }) {
           {/* Comments Section - Only show for preview-gated content since ResourceContentView includes its own comments */}
           {requiresPreviewGate && (
             <div className="mt-8" data-comments-section>
-              <ZapThreads
+              <DeferredZapThreads
                 eventDetails={{
                   identifier: normalizedResourceId,
                   pubkey: event.pubkey,

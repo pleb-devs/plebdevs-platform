@@ -1,5 +1,6 @@
 "use client";
 
+import { createResourceDisplay, parseEvent } from "@/data/types";
 import { useVideosQuery, VideoResourceWithNote } from "@/hooks/useVideosQuery";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { ContentCard } from "@/components/ui/content-card";
@@ -9,6 +10,7 @@ import { useHomepageSectionConfig } from "@/hooks/useContentConfig";
 import { applyContentFilters } from "@/lib/content-config";
 import { tagsToAdditionalLinks } from "@/lib/additional-links";
 import { getEventATag } from "@/lib/nostr-a-tag";
+import { resolvePreferredDisplayName } from "@/lib/profile-display";
 
 /**
  * Client component for fetching and displaying video resources
@@ -122,6 +124,15 @@ export function VideosSection() {
  * Transforms Video resource data into a format compatible with ContentCard
  */
 function VideoCard({ video }: { video: VideoResourceWithNote }) {
+  const parsedVideo = video.note ? parseEvent(video.note) : null
+  const display = parsedVideo
+    ? createResourceDisplay(video, parsedVideo)
+    : null
+  const authorName = resolvePreferredDisplayName({
+    preferredNames: [display?.instructor],
+    user: video.user,
+    pubkey: display?.instructorPubkey || parsedVideo?.pubkey || video.user?.pubkey || video.userId,
+  })
   
   // Transform VideoResourceWithNote into ContentCard-compatible format
   const contentItem = {
@@ -137,8 +148,8 @@ function VideoCard({ video }: { video: VideoResourceWithNote }) {
     image: video.note?.tags.find(tag => tag[0] === "image")?.[1] || '',
     href: `/content/${video.id}`,
     tags: video.note?.tags || [],
-    author: video.userId,
-    instructor: video.userId,
+    author: authorName,
+    instructor: authorName,
     instructorPubkey: video.note?.pubkey || '',
     published: true,
     createdAt: video.createdAt,
@@ -156,5 +167,5 @@ function VideoCard({ video }: { video: VideoResourceWithNote }) {
     purchases: video.purchases,
   };
 
-  return <ContentCard item={contentItem} variant="content" showContentTypeTags={false} />;
+  return <ContentCard item={contentItem} variant="content" showContentTypeTags={false} engagementMode="off" />;
 } 
