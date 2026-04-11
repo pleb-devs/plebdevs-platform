@@ -199,20 +199,28 @@ function ResourcePageContent({ resourceId }: { resourceId: string }) {
   })
 
   useEffect(() => {
+    let isCancelled = false
+
     const fetchEvent = async () => {
       try {
-        setLoading(true)
-        setError(null)
+        if (!isCancelled) {
+          setLoading(true)
+          setError(null)
+        }
         
         // Resolve the universal ID to determine how to fetch the content
         const resolved = resolveUniversalId(resourceId)
         if (!resolved) {
-          setIdResult(null)
-          setError('Unsupported identifier')
-          setLoading(false)
+          if (!isCancelled) {
+            setIdResult(null)
+            setError('Unsupported identifier')
+            setLoading(false)
+          }
           return
         }
-        setIdResult(resolved)
+        if (!isCancelled) {
+          setIdResult(resolved)
+        }
         
         let nostrEvent: NostrEvent | null = null
         
@@ -234,8 +242,10 @@ function ResourcePageContent({ resourceId }: { resourceId: string }) {
             }, relayHints ? { relays: relayHints } : {})
           } else {
             console.error('Invalid nevent decoded data', resolved.decodedData)
-            setError('Invalid identifier metadata')
-            setLoading(false)
+            if (!isCancelled) {
+              setError('Invalid identifier metadata')
+              setLoading(false)
+            }
             return
           }
         } else if (resolved.idType === 'naddr' && resolved.decodedData) {
@@ -259,8 +269,10 @@ function ResourcePageContent({ resourceId }: { resourceId: string }) {
             }, relayHints ? { relays: relayHints } : {})
           } else {
             console.error('Invalid naddr decoded data', resolved.decodedData)
-            setError('Invalid identifier metadata')
-            setLoading(false)
+            if (!isCancelled) {
+              setError('Invalid identifier metadata')
+              setLoading(false)
+            }
             return
           }
         } else if (resolved.idType === 'note' || resolved.idType === 'hex') {
@@ -277,20 +289,32 @@ function ResourcePageContent({ resourceId }: { resourceId: string }) {
         }
         
         if (nostrEvent) {
-          setEvent(nostrEvent)
+          if (!isCancelled) {
+            setEvent(nostrEvent)
+          }
         } else {
-          setError('Resource not found')
+          if (!isCancelled) {
+            setError('Resource not found')
+          }
         }
       } catch (err) {
         console.error('Error fetching Nostr event:', err)
-        setError('Failed to fetch resource')
+        if (!isCancelled) {
+          setError('Failed to fetch resource')
+        }
       } finally {
-        setLoading(false)
+        if (!isCancelled) {
+          setLoading(false)
+        }
       }
     }
 
     if (resourceId) {
-      fetchEvent()
+      void fetchEvent()
+    }
+
+    return () => {
+      isCancelled = true
     }
   }, [resourceId, fetchSingleEvent])
 
@@ -327,6 +351,9 @@ function ResourcePageContent({ resourceId }: { resourceId: string }) {
         setResourceMeta(nextMeta)
       } catch (error) {
         console.error('Failed to fetch resource access metadata:', error)
+        if (!isCancelled) {
+          setResourceMeta(null)
+        }
       } finally {
         if (!isCancelled) {
           setIsPurchaseStatusLoading(false)
