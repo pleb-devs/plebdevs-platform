@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { ResourceAdapter } from '@/lib/db-adapter'
-import { parseEvent } from '@/data/types'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -22,7 +21,7 @@ export async function generateMetadata(
   }
 
   try {
-    const resource = await ResourceAdapter.findByIdWithNote(id)
+    const resource = await ResourceAdapter.findById(id)
     if (!resource) {
       return {
         title: 'Content Not Found | pleb.school',
@@ -30,37 +29,19 @@ export async function generateMetadata(
       }
     }
 
-    // Parse Nostr note if available for richer metadata
-    let title = 'Content'
-    let description = 'View content on pleb.school'
-    let image: string | undefined
-
-    if (resource.note) {
-      try {
-        const parsed = parseEvent(resource.note)
-        title = parsed.title || title
-        description = parsed.summary || description
-        image = parsed.image
-      } catch {
-        // Use defaults if parsing fails
-      }
-    }
-
     const metadata: Metadata = {
-      title: `${title} | pleb.school`,
-      description: description.slice(0, 160),
+      title: 'Content | pleb.school',
+      description: 'View content on pleb.school',
       openGraph: {
-        title,
-        description: description.slice(0, 160),
+        title: 'Content',
+        description: 'View content on pleb.school',
         type: 'article',
         siteName: 'pleb.school',
-        ...(image && { images: [{ url: image }] }),
       },
       twitter: {
-        card: image ? 'summary_large_image' : 'summary',
-        title,
-        description: description.slice(0, 160),
-        ...(image && { images: [image] }),
+        card: 'summary',
+        title: 'Content',
+        description: 'View content on pleb.school',
       },
     }
 
