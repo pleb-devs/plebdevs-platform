@@ -24,6 +24,8 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions)
+    const includeLessonsParam = request.nextUrl.searchParams.get("includeLessons")
+    const includeLessons = includeLessonsParam !== "false"
     const { id } = await params;
     const courseId = id;
     
@@ -84,8 +86,9 @@ export async function GET(
       })
     }
 
-    // Fetch lessons with resources in a single query (avoids N+1)
-    const lessonsWithResources = await LessonAdapter.findByCourseIdWithResources(courseId);
+    const lessonsWithResources = includeLessons
+      ? await LessonAdapter.findByCourseIdWithResources(courseId)
+      : []
 
     return NextResponse.json({
       course: {

@@ -5,36 +5,33 @@ import Link from "next/link"
 import { 
   ArrowLeft,
   ArrowRight,
-  User,
   BookOpen,
-  FileText,
   RotateCcw,
   ExternalLink,
 } from "lucide-react"
-import { encodePublicKey } from "snstr"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
 import { MainLayout } from '@/components/layout/main-layout'
 import { Section } from '@/components/layout/section'
 import { formatContentForDisplay, extractVideoBodyMarkdown, isLikelyEncryptedContent } from '@/lib/content-utils'
 import { parseCourseEvent, parseEvent } from '@/data/types'
 import { MarkdownRenderer } from '@/components/ui/markdown-renderer'
 import { VideoPlayer } from '@/components/ui/video-player'
-import { ZapThreads } from '@/components/ui/zap-threads'
+import { DeferredZapThreads } from '@/components/ui/deferred-zap-threads'
 import { ResourceMetadataHero } from '@/app/content/components/resource-content-view'
 import { BreadcrumbSkeleton, LessonDetailsSkeleton } from './lesson-details-skeleton'
 import { useCourseQuery } from '@/hooks/useCoursesQuery'
-import { useLessonsQuery, useLessonQuery } from '@/hooks/useLessonsQuery'
+import { useLessonsQuery } from '@/hooks/useLessonsQuery'
 import { LessonWithResource } from '@/hooks/useLessonsQuery'
-import { useNostr, type NormalizedProfile } from '@/hooks/useNostr'
 import { resolveUniversalId } from '@/lib/universal-router'
+import { extractNoteId } from '@/lib/nostr-events'
 import { getRelays } from '@/lib/nostr-relays'
 import { useCommentThreads } from '@/hooks/useCommentThreads'
 import type { AdditionalLink } from '@/types/additional-links'
 import { AdditionalLinksCard } from '@/components/ui/additional-links-card'
 import { SidebarToggle } from '@/components/ui/sidebar-toggle'
+import { profileSummaryFromUser, resolvePreferredDisplayName } from '@/lib/profile-display'
 import { extractRelayHintsFromDecodedData } from '@/lib/relay-hints'
 
 function resolveLessonVideoUrl(
@@ -68,17 +65,6 @@ interface LessonDetailsPageProps {
     lessonId: string
   }>
 }
-
-function formatNpubWithEllipsis(pubkey: string): string {
-  try {
-    const npub = encodePublicKey(pubkey as `${string}1${string}`);
-    return `${npub.slice(0, 12)}...${npub.slice(-6)}`;
-  } catch {
-    // Fallback to hex format if encoding fails
-    return `${pubkey.slice(0, 6)}...${pubkey.slice(-6)}`;
-  }
-}
-
 
 /**
  * Lesson navigation component
@@ -125,45 +111,6 @@ function LessonNavigation({
   )
 }
 
-/**
- * Client component for displaying instructor with profile data
- */
-function InstructorDisplay({ instructorPubkey, fallbackName }: { instructorPubkey?: string; fallbackName: string }) {
-  const { fetchProfile, normalizeKind0 } = useNostr()
-  const [instructorProfile, setInstructorProfile] = useState<NormalizedProfile | null>(null)
-
-  useEffect(() => {
-    const fetchInstructorProfile = async () => {
-      if (instructorPubkey) {
-        try {
-          const profileEvent = await fetchProfile(instructorPubkey)
-          const normalizedProfile = normalizeKind0(profileEvent)
-          setInstructorProfile(normalizedProfile)
-        } catch (error) {
-          console.error('Error fetching instructor profile:', error)
-        }
-      }
-    }
-
-    fetchInstructorProfile()
-  }, [instructorPubkey, fetchProfile, normalizeKind0])
-
-  const displayName = instructorProfile?.name || 
-                      instructorProfile?.display_name || 
-                      fallbackName || 
-                      (instructorPubkey ? formatNpubWithEllipsis(instructorPubkey) : 'Unknown')
-
-  return (
-    <div className="flex items-center space-x-1">
-      <User className="h-4 w-4" />
-      <span>{displayName}</span>
-    </div>
-  )
-}
-
-/**
- * Lesson content component
- */
 function LessonContent({ 
   courseId, 
   lessonId 
@@ -181,23 +128,18 @@ function LessonContent({
     return Array.from(new Set([...courseHints, ...lessonHints]))
   }, [resolvedCourse?.decodedData, resolvedLesson?.decodedData])
   
-  // Use the new hooks to fetch lesson and course data with Nostr integration
-  const { lesson: lessonData, isLoading: lessonLoading, isError: lessonError } = useLessonQuery(resolvedLessonId)
   const { course: courseData, isLoading: courseLoading } = useCourseQuery(resolvedCourseId)
   const { lessons: lessonsData, isLoading: lessonsDataLoading } = useLessonsQuery(resolvedCourseId)
 
   const lessonDisplays = useMemo(() => lessonsData || [], [lessonsData])
-
-  const fallbackLesson = useMemo(() => {
-    return lessonDisplays.find(lesson => 
+  const lesson = useMemo(() => {
+    return lessonDisplays.find(lesson =>
       lesson.id === resolvedLessonId || lesson.resource?.id === resolvedLessonId
     ) || null
   }, [lessonDisplays, resolvedLessonId])
-
-  const lesson = lessonData ?? fallbackLesson
   const resourceNote = lesson?.resource?.note || null
 
-  const loading = lessonLoading || courseLoading || lessonsDataLoading
+  const loading = courseLoading || lessonsDataLoading
 
   const resourceRequiresPurchase = Boolean((lesson?.resource as any)?.requiresPurchase)
   const resourceUnlockedViaCourse = Boolean((lesson?.resource as any)?.unlockedViaCourse)
@@ -223,14 +165,6 @@ function LessonContent({
   }
 
   if (!lesson) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground">Lesson not found</p>
-      </div>
-    )
-  }
-
-  if (lessonError && !lessonData) {
     return (
       <div className="text-center py-8">
         <p className="text-muted-foreground">Lesson not found</p>
@@ -271,18 +205,21 @@ function LessonContent({
   }
 
   // Parse data from database and Nostr notes
-  let resourceTitle = 'Unknown Lesson'
+  let resourceTitle = lesson.title || `Lesson ${lesson.index + 1}`
   let resourceType: string = 'document'
   let resourceIsPremium = false
   let resourceImage = ''
   let resourceAdditionalLinks: AdditionalLink[] = []
   let resourceVideoUrl: string | undefined = lesson.resource.videoUrl || undefined
 
-let courseTitle = 'Unknown Course'
-let courseCategory = 'general'
-let courseInstructorPubkey = ''
+  let courseTitle = 'Course'
+  let courseCategory = 'general'
+  let courseInstructorPubkey = courseData?.user?.pubkey || courseData?.note?.pubkey || courseData?.userId || ''
+  let courseInstructorName = resolvePreferredDisplayName({
+    user: courseData?.user,
+    pubkey: courseInstructorPubkey,
+  })
 
-  // Start with database data
   resourceIsPremium = (lesson.resource.price ?? 0) > 0
   const resourceId = lesson.resource.id
 
@@ -303,23 +240,24 @@ let courseInstructorPubkey = ''
     }
   }
 
-  // Parse course data if available
   if (courseData) {
-    courseInstructorPubkey = courseData.userId
-    
     if (courseData.note) {
       try {
         const parsedCourse = parseCourseEvent(courseData.note)
         courseTitle = parsedCourse.title || courseTitle
         courseCategory = parsedCourse.category || courseCategory
         courseInstructorPubkey = parsedCourse.instructorPubkey || courseInstructorPubkey
+        courseInstructorName = resolvePreferredDisplayName({
+          preferredNames: [parsedCourse.instructor],
+          user: courseData.user,
+          pubkey: courseInstructorPubkey,
+        })
       } catch (error) {
         console.error('Error parsing course note:', error)
       }
     }
   }
 
-  // Create mock resource content for now - in future this should come from the Nostr event content
   const mockResourceContent = {
     content: lesson.resource.note?.content || 'No content available',
     isMarkdown: true,
@@ -346,7 +284,6 @@ let courseInstructorPubkey = ''
   const hasEncryptedBody = isLikelyEncryptedContent(formattedContent)
   const hasEncryptedVideoBody = isLikelyEncryptedContent(videoBodyMarkdown)
   
-  // Use enhanced lesson displays from useLessonsQuery hook
   const currentLessonIndex = lessonDisplays.findIndex(l => 
     l.id === lesson.id || l.resource?.id === resolvedLessonId
   )
@@ -354,6 +291,7 @@ let courseInstructorPubkey = ''
   const prevLesson = safeLessonIndex > 0 ? lessonDisplays[safeLessonIndex - 1] : null
   const nextLesson = safeLessonIndex < lessonDisplays.length - 1 ? lessonDisplays[safeLessonIndex + 1] : null
   const nostrUrl = resourceNote?.id ? `https://njump.me/${resourceNote.id}` : null
+  const lessonThreadIdentifier = resourceNote ? extractNoteId(resourceNote) : undefined
 
   const heroNavCtas = (
     <div className="flex items-center gap-2 flex-wrap justify-end">
@@ -404,6 +342,17 @@ let courseInstructorPubkey = ''
           serverPrice={lesson.resource.price ?? null}
           serverPurchased={resourcePurchased}
           interactionData={interactionData}
+          authorPubkey={
+            parsedResource.authorPubkey ||
+            lesson.resource.user?.pubkey ||
+            resourceNote.pubkey
+          }
+          authorName={resolvePreferredDisplayName({
+            preferredNames: [parsedResource.author],
+            user: lesson.resource.user,
+            pubkey: resourceNote.pubkey,
+          })}
+          authorProfile={profileSummaryFromUser(lesson.resource.user)}
           relayHints={routeRelayHints}
           showBackLink
           backHref={`/courses/${resolvedCourseId}`}
@@ -434,7 +383,7 @@ let courseInstructorPubkey = ''
             <div>
               <h3 className="font-semibold">{courseTitle}</h3>
               <div className="text-sm text-muted-foreground">
-                <InstructorDisplay instructorPubkey={courseInstructorPubkey} fallbackName="Unknown" />
+                <span>{courseInstructorName}</span>
               </div>
             </div>
           </div>
@@ -555,11 +504,11 @@ let courseInstructorPubkey = ''
       )}
       
       {/* Comments Section */}
-      {lesson.resource?.note && (
+      {lesson.resource?.note && lessonThreadIdentifier && (
         <div data-comments-section>
-          <ZapThreads
+          <DeferredZapThreads
             eventDetails={{
-              identifier: lesson.resource.id,
+              identifier: lessonThreadIdentifier,
               pubkey: lesson.resource.note.pubkey,
               kind: lesson.resource.note.kind,
               relays: getRelays('default')
