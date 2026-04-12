@@ -24,6 +24,7 @@ interface ResourcePageData {
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const RESOURCE_EVENT_KINDS = [30023, 30402, 30403]
+const RESOURCE_ONLY_KINDS = new Set(RESOURCE_EVENT_KINDS)
 const RESOURCE_EVENT_PRIORITY: EventPriorityConfig = {
   30023: 3,
   30402: 2,
@@ -61,6 +62,10 @@ async function fetchResourceEvent(resourceId: string): Promise<NostrEvent | null
     "kind" in resolved.decodedData
   ) {
     const addressData = resolved.decodedData as AddressData
+    if (!RESOURCE_ONLY_KINDS.has(addressData.kind)) {
+      return null
+    }
+
     const relays =
       Array.isArray(addressData.relays) && addressData.relays.length > 0
         ? addressData.relays

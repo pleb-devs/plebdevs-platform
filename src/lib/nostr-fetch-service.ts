@@ -7,7 +7,7 @@ import { NostrEvent, type RelayPool, type Filter } from 'snstr'
 import {
   selectPreferredEventByPriority,
   type EventPriorityConfig,
-} from './nostr-event-priority'
+} from '@/lib/nostr-event-priority'
 import { DEFAULT_RELAYS, getRelays } from './nostr-relays'
 
 const DTAG_EVENT_PRIORITY: EventPriorityConfig = {
